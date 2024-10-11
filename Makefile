@@ -6,7 +6,7 @@ BINDIR = bin
 LOGDIR = log
 
 JAVA_TARGET = 21
-MAIN_CLASS = com.ass2.Main
+MAIN_CLASS = com.ass2.Client
 SPREAD_CONF = $(RESOURCES)/spread.conf
 
 CLIENT_JAR = $(BINDIR)/client.jar
