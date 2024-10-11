@@ -1,0 +1,4 @@
+deposit 100
+addInterest 10
+getQuickBalance
+getSyncedBalance
