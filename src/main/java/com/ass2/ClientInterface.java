@@ -14,7 +14,7 @@ public interface ClientInterface {
 	public void deposit(int amount);
 	public void deposit(float amount);
 	
-	public int addInterest(int interest);
+	public void addInterest(int interest);
 
 	public List<Transaction> getHistory();
 
@@ -22,10 +22,5 @@ public interface ClientInterface {
 
 	public void cleanHistory();
 
-	public Collection<String> memberInfo();
-
-	public void sleep(int seconds);
-
-	public void exit();
-    
+	public Collection<String> memberInfo();    
 }
