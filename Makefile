@@ -49,7 +49,7 @@ run_interactive: $(CLIENT_JAR)
 	java -cp $(CLIENT_JAR):$(DEPS) $(MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS)
 
 run_simulation: $(CLIENT_JAR)
-	java -cp $(CLIENT_JAR):$(DEPS) $(MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) commands.txt
+	java -cp $(CLIENT_JAR):$(DEPS) $(MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) $(RESOURCES)/commands.txt
 
 
 all: classfiles $(CLIENT_JAR)
