@@ -1,8 +1,13 @@
 package com.ass2;
 
-import spread.*;
+import java.util.Arrays;
+
+import spread.AdvancedMessageListener;
+import spread.SpreadException;
+import spread.SpreadMessage;
 
 public class Listener implements AdvancedMessageListener {
+    @Override
 	public void regularMessageReceived(SpreadMessage message) {
 		String msg = null;
 		try {
@@ -15,6 +20,6 @@ public class Listener implements AdvancedMessageListener {
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage spreadMessage) {
-		System.out.println(spreadMessage.getMembershipInfo().getMembers());
+		System.out.println(Arrays.toString(spreadMessage.getMembershipInfo().getMembers()));
 	}
 }
