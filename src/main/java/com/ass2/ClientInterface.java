@@ -8,19 +8,16 @@ public interface ClientInterface {
     public BigDecimal getQuickBalance();
 
 	public BigDecimal getSyncedBalance();
-
-	public void deposit(BigDecimal amount);
-
-	public void deposit(int amount);
-	public void deposit(float amount);
 	
-	public void addInterest(int interest);
-
 	public List<Transaction> getHistory();
 
 	public boolean checkTxStatus(String transactionId);
 
 	public void cleanHistory();
 
-	public Collection<String> memberInfo();    
+	public Collection<String> memberInfo(); 
+
+	public void sleep(int seconds);
+
+	public void exit();   
 }

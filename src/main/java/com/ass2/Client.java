@@ -26,7 +26,7 @@ public final class Client implements ClientInterface {
     private static final int PORT = 4803;
 
     private final SpreadConnection connection = new SpreadConnection();
-    private final Listener listener = new Listener();
+    private final Listener listener;
 
     private final Collection<Transaction> outstanding;
     private final List<Transaction> executed;
@@ -49,6 +49,7 @@ public final class Client implements ClientInterface {
         this.order_counter = 0;
         this.outstanding_counter = 0;
 
+		this.listener = new Listener(this);
         this.account = new Account(accountName);
 
         this.joinGroup(accountName);
@@ -66,11 +67,8 @@ public final class Client implements ClientInterface {
     // Constructor 3: Interactive mode
     public Client(String spreadAddress, String accountName, int numberOfReplicas, boolean interactive) {
         this(spreadAddress, accountName, numberOfReplicas);
-
-        if (!interactive) {
-            return;
-        }
-
+        if (!interactive) return;
+    
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 String line = scanner.nextLine();
@@ -98,24 +96,16 @@ public final class Client implements ClientInterface {
         }
     }
 
-	// Execute tast in outstanding collection and update all lists
-	private void processOutstanding(){
-
-		// TODO: Sort outstanding transactions by vector id
-		for (Transaction transaction : this.outstanding) {
-			transaction.execute(this);
-			this.executed.add(transaction);
-			this.outstanding.remove(transaction);
-		}
-	}
-
 	// Handle incoming messages
 	public void handleMessage(String message) {
-		System.out.println("Received message: " + message);
-		Transaction transaction = new Transaction(message, this.id + " " + this.order_counter);
-		this.order_counter++;
-		transaction.execute(this);
-		this.executed.add(transaction);
+		System.out.println("Handling string: " + message);
+		Transaction transaction = new Transaction(message, this.id + " " + this.outstanding_counter);
+		this.outstanding_counter++;
+		this.outstanding.add(transaction);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+        }
 	}
 
     // Join Spread group
@@ -126,54 +116,85 @@ public final class Client implements ClientInterface {
 
             this.group = new SpreadGroup();
             group.join(this.connection, accountName);
-
-            SpreadMessage message = new SpreadMessage();
-            message.addGroup(group);
-            message.setFifo();
-            message.setObject("Client name: " + this.id);
-
-            this.connection.multicast(message);
         } catch (SpreadException | UnknownHostException e) {
             throw new RuntimeException(e);
         }
     }
 
 	private void broadcastTransaction(Transaction transaction){
-		 if (!this.outstanding.isEmpty()) {
 			try {
 				SpreadMessage message = new SpreadMessage();
 				message.addGroup(this.group);
 				message.setFifo();
 
 				message.setObject(transaction); // Send a copy of the outstanding collection
-
+				message.setSelfDiscard(true);
+				
 				this.connection.multicast(message);
-				System.out.println("Broadcasting outstanding transactions...");
+				System.err.println("Broadcasted transaction: " + transaction);
+
 			} catch (SpreadException e) {
 				System.err.println("Error broadcasting transaction: " + e.getMessage());
 			}
-		}
 	}
 
 	private void broadcastAllTransactions(){
+		System.err.println("Broadcasting all outstanding transactions: " + this.outstanding.size());
+
+		HashSet<Transaction> toRemove = new HashSet<>();
+
 		for (Transaction transaction : this.outstanding) {
+			if (!transaction.getClientName().equals(this.id)) {
+				// System.err.println("Skipping broadcast of foreign: " + transaction);
+				continue;
+			}
+
+			System.err.println("Broadcasting transaction: " + transaction);
 			this.broadcastTransaction(transaction);
-			this.outstanding.remove(transaction);
+
+			if (this.executed.contains(transaction)) {
+				toRemove.add(transaction);
+			}
 		}
+		this.outstanding.removeAll(toRemove);
 	}
 
     // Schedule periodic broadcasting of outstanding transactions called every 10 seconds
     private void scheduleBroadcasting() {
+		System.err.println("initiating scheduler");
+
         this.scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(this::broadcastAllTransactions, 0, 10, TimeUnit.SECONDS);  
     }
+	// Add transaction to outstanding collection
+	public synchronized void addPending(Transaction transaction){
+		System.err.println("adding outstanding transaction: " + transaction);
+		this.outstanding.add(transaction);
+		this.outstanding_counter++;
+	}
 
+	// Execute event in outstanding collection  	
+	private void processOutstanding(){
+        // TODO: Sort outstanding transactions by vector id
+        
+        for (Transaction transaction : this.outstanding) {
+            if (this.executed.contains(transaction)){
+                continue;
+            }
+            
+            transaction.execute(this);
+            this.executed.add(transaction);
+        }		
+	}
+
+    @Override
 	public BigDecimal getQuickBalance() {
 		BigDecimal balance = this.account.getBalance();
 		System.out.println("Quick balance: " + balance);
 		return balance;
 	}
 
+    @Override
 	public BigDecimal getSyncedBalance(){
 		// TODO: actually sync balance
 		BigDecimal balance = this.account.getBalance();
@@ -181,25 +202,12 @@ public final class Client implements ClientInterface {
 		throw new UnsupportedOperationException();
 	}
 
-	public void deposit(BigDecimal amount){
-		this.account.deposit(amount);
-	}
-
-	public void deposit(int amount){
-		this.deposit(new BigDecimal(amount));
-	}
-	public void deposit(float amount){
-		this.deposit(new BigDecimal(amount));
-	}
-	
-	public void addInterest(int interest){
-		this.account.addInterest(interest);
-	}
-
+    @Override
 	public List<Transaction> getHistory(){
-		throw new UnsupportedOperationException();
+		return this.executed;
 	}
 
+    @Override
 	public boolean checkTxStatus(String transactionId){
 		for (Transaction transaction : this.outstanding) {
 			if (transaction.getId().equals(transactionId)) {
@@ -209,14 +217,17 @@ public final class Client implements ClientInterface {
 		return true;
 	}
 
+    @Override
 	public void cleanHistory(){
 		this.executed.clear();
 	}
 
+    @Override
 	public Collection<String> memberInfo(){
 		throw new UnsupportedOperationException();
 	}
 
+    @Override
 	public  void sleep(int seconds){
 		try {
 			Thread.sleep(seconds * 1000);
@@ -225,8 +236,10 @@ public final class Client implements ClientInterface {
 		}
 	}
 
+    @Override
 	public  void exit(){
 		try {
+			this.connection.remove(this.listener);
 			this.connection.disconnect();
 			System.out.println(this.id + " disconnected");	
 		} catch (SpreadException e) {

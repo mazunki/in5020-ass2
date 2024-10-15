@@ -7,19 +7,29 @@ import spread.SpreadException;
 import spread.SpreadMessage;
 
 public class Listener implements AdvancedMessageListener {
+	Client client;
+
+	public Listener(Client client) {
+		this.client = client;
+	}
+
     @Override
 	public void regularMessageReceived(SpreadMessage message) {
-		String msg = null;
 		try {
-			msg = (String) message.getObject();
+
+			if (message.getObject() instanceof Transaction transaction) {
+				this.client.addPending(transaction);
+				System.err.println("Received transaction: " + transaction);
+			}
 		} catch (SpreadException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println(msg);
 	}
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage spreadMessage) {
 		System.out.println(Arrays.toString(spreadMessage.getMembershipInfo().getMembers()));
+		//TODO: Handle new clients
 	}
 }
+
