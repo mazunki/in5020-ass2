@@ -1,0 +1,16 @@
+deposit 1000
+getQuickBalance
+getSyncedBalance
+sleep 3
+getSyncedBalance
+deposit 1000
+getQuickBalance
+getSyncedBalance
+sleep 3
+getSyncedBalance
+deposit 1000
+getQuickBalance
+getSyncedBalance
+sleep 3
+getSyncedBalance
+exit
