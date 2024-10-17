@@ -1,25 +1,25 @@
-deposit 1000
-getQuickBalance
-addInterest 10
-getSyncedBalance
-deposit 500
-getQuickBalance
-sleep 2
-addInterest 20
-getSyncedBalance
-deposit 1000
-getQuickBalance
-sleep 1
-addInterest 5
-getSyncedBalance
-getHistory
-sleep 2
-addInterest 50
-getSyncedBalance
-deposit 2000
-getQuickBalance
-addInterest 10
-getSyncedBalance
-cleanHistory
 memberInfo
+getSyncedBalance
+getQuickBalance
+deposit 50
+getQuickBalance
+sleep 10
+getSyncedBalance
+addInterest 30
+getSyncedBalance
+deposit 200
+deposit -100
+deposit 10
+deposit 30
+deposit -100
+deposit 50
+addInterest 20
+sleep 9
+memberInfo
+getSyncedBalance
+getQuickBalance
+sleep 30
+getSyncedBalance
+getQuickBalance
+getHistory
 exit
