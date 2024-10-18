@@ -7,130 +7,140 @@ import spread.SpreadMessage;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Client {
-    private SpreadConnection connection;
-    private Replica replica;
-    private SpreadGroup group;
+	private SpreadConnection connection;
+	private Replica replica;
+	private SpreadGroup group;
+	Listener listener;
 
-    // Client constructor: each Client creates its own Replica
-    public Client(InetAddress serverAddress, String accountName, String filename) {
-        // Create a unique replica for this client
-        this.replica = new Replica(accountName, filename);
+	public Client(InetAddress serverAddress, String accountName, String filename) {
+		this.replica = new Replica(accountName);
 
-        try {
-            // Establish connection to the Spread server
-            connection = new SpreadConnection();
-            connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
-            System.out.println("Connected to Spread server at: " + serverAddress);
+		try {
+			connection = new SpreadConnection();
+			connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
+			System.out.println("Connected to Spread server at: " + serverAddress);
 
-            group = new SpreadGroup();
-            group.join(connection, accountName);
-            System.out.println("Joined group: " + accountName);
+			group = new SpreadGroup();
+			group.join(connection, accountName);
+			System.out.println("Joined group: " + accountName);
 
-            connection.add(new Listener(this));
-        } catch (SpreadException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
+			this.listener = new Listener(this);
+			connection.add(listener);
 
-    // Process and broadcast transactions
-    public void addPending(Transaction transaction) {
-        System.out.println("Processing transaction: " + transaction);
-        broadcastTransaction(transaction);
-        replica.execute(transaction);  // Execute the transaction locally
-    }
+			if (filename != null) {
+				loadCommandsFromFile(filename);
+			}
 
-    // Broadcast transaction to other replicas in the group
-    public void broadcastTransaction(Transaction transaction) {
-        SpreadMessage message = new SpreadMessage();
-        message.setFifo(); // Ensure FIFO ordering of messages
-        message.addGroup(group);
-        try {
-            message.setObject(transaction);
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
+		} catch (SpreadException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
 
-        try {
-            connection.multicast(message); // Send the transaction to the group
-            System.out.println("Broadcasted transaction: " + transaction);
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
-    }
+	private void loadCommandsFromFile(String filename) {
+		try (Scanner scanner = new Scanner(new java.io.File(filename))) {
+			while (scanner.hasNextLine()) {
+				this.parseInputLine(scanner.nextLine());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    // Command: Get the quick balance of the local replica
-    public void getQuickBalance() {
-        replica.getBalance();
-    }
+	private void parseInputLine(String line) {
+		String[] parts = line.split(" ");
+		String cmdName = parts[0];
+		String[] args = Arrays.copyOfRange(parts, 1, parts.length);
 
-    // Command: Placeholder for getting synchronized balance
-    public void getSyncedBalance() {
-        System.out.println("Synchronized balance: [To be implemented]");
-    }
+		this.processCommand(cmdName, args);
+	}
 
-    // Command: Placeholder for transaction history
-    public void getHistory() {
-        System.out.println("Transaction history: [To be implemented]");
-    }
+	private void processCommand(String commandName, String[] args) {
+		switch (commandName) {
+			case "getSyncedBalance" -> this.getSyncedBalance();
+			case "memberInfo" -> this.memberInfo();
+			case "exit" -> this.exit();
+			case "sleep" -> {
+				if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
+				else System.out.println("Invalid sleep command.");
+			}
+			default -> replica.processCommand(commandName, args);
+		}
+	}
 
-    // Command: Placeholder for cleaning history
-    public void cleanHistory() {
-        System.out.println("History cleaned.");
-    }
+	public void getSyncedBalance() {
+		System.out.println("Synchronized balance: [To be implemented]");
+	}
 
-    // Command: Display current group members
-    public void memberInfo() {
-        System.out.println("Current group members: " + group);
-    }
+	public void memberInfo() {
+		System.out.println("Current group members: " + group);
+	}
 
-    // Command: Check transaction status by ID
-    public void checkTxStatus(String transactionId) {
-        System.out.println("Transaction status: [To be implemented for " + transactionId + "]");
-    }
+	public void addPending(Transaction transaction) {
+		System.out.println("Processing transaction: " + transaction);
+		broadcastTransaction(transaction);
+		replica.execute(transaction);  // Execute the transaction locally
+	}
 
-    // Sleep for a given duration
-    public void sleep(int duration) {
-        try {
-            Thread.sleep(duration * 1000L); // Sleep in seconds
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        System.out.println("Slept for " + duration + " seconds.");
-    }
+	public void broadcastTransaction(Transaction transaction) {
+		SpreadMessage message = new SpreadMessage();
+		message.setFifo(); // Ensure FIFO ordering of messages
+		message.addGroup(group);
+		try {
+			message.setObject(transaction);
+		} catch (SpreadException e) {
+			e.printStackTrace();
+		}
 
-    // Exit the client, leave the group, and disconnect
-    public void exit() {
-        try {
-            group.leave();  // Leave the group
-            connection.disconnect();  // Disconnect from the server
-            System.out.println("Client exited.");
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
-    }
+		try {
+			connection.multicast(message); // Send the transaction to the group
+			System.out.println("Broadcasted transaction: " + transaction);
+		} catch (SpreadException e) {
+			e.printStackTrace();
+		}
+	}
 
-    // Main method to run the Client
-    public static void main(String[] args) throws UnknownHostException {
-        if (args.length < 3 || args.length > 4) {
-            System.out.println("Usage: java Client <server> <account> <no_replicas> [filename]");
-            return;
-        }
+	public void sleep(int duration) {
+		try {
+			Thread.sleep(duration * 1000L); // Sleep in seconds
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		System.out.println("Slept for " + duration + " seconds.");
+	}
 
-        String serverAddress = args[0];  // Server address
-        String accountName = args[1];    // Account name for the replica group
-        int noOfReplicas = Integer.parseInt(args[2]);  // Number of replicas
-        String filename = (args.length == 4) ? args[3] : null;  // Optional filename for batch mode
+	public void exit() {
+		try {
+			group.leave();
+			this.connection.remove(this.listener);
+			connection.disconnect();
+			System.out.println("Client exited.");
+		} catch (SpreadException e) {
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
 
-        InetAddress address = InetAddress.getByName(serverAddress);
+	public static void main(String[] args) throws UnknownHostException {
+		if (args.length < 3 || args.length > 4) {
+			System.out.println("Usage: java Client <server> <account> <no_replicas> [filename]");
+			return;
+		}
 
-        // Create each Client and its own Replica for the given number of replicas
-        for (int i = 0; i < noOfReplicas; i++) {
-            new Client(address, accountName, filename);
-        }
-    }
+		String serverAddress = args[0];  // Server address
+		String accountName = args[1];    // Account name for the replica group
+		int noOfReplicas = Integer.parseInt(args[2]);  // Number of replicas
+		String filename = (args.length == 4) ? args[3] : null;  // Optional filename for batch mode
+
+		InetAddress address = InetAddress.getByName(serverAddress);
+
+		for (int i = 0; i < noOfReplicas; i++) {
+			new Client(address, accountName, filename);
+		}
+	}
 }
 
