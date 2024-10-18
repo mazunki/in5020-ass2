@@ -31,30 +31,9 @@ public class Transaction implements Serializable {
         return parts.length > 1 ? parts[1].split(" ") : new String[0];
     }
 
-    // Executes the transaction on the provided Replica instance
-    public void execute(Replica replica) {
-        String[] parts = this.command.split(" ");
-        String cmd = parts[0];
-
-        switch (cmd) {
-            case "deposit" -> {
-                if (parts.length == 2) {
-                    replica.deposit(new BigDecimal(parts[1]));
-                } else {
-                    System.out.println("Invalid number of arguments for deposit.");
-                }
-            }
-            case "addInterest" -> {
-                if (parts.length == 2) {
-                    replica.addInterest(Integer.parseInt(parts[1]));
-                } else {
-                    System.out.println("Invalid number of arguments for interest.");
-                }
-            }
-            case "getHistory" -> replica.getHistory();
-            default -> System.out.println("Unknown command: " + command);
-        }
-    }
+	public void process(Replica replica) {
+		replica.processCommand(this.command);
+	}
 
     @Override
     public String toString() {

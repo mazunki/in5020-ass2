@@ -59,6 +59,7 @@ public class Client {
 		this.processCommand(cmdName, args);
 	}
 
+	// Processes a command by determining if it's handled locally or needs to be broadcast
 	private void processCommand(String commandName, String[] args) {
 		switch (commandName) {
 			case "getSyncedBalance" -> this.getSyncedBalance();
@@ -68,36 +69,44 @@ public class Client {
 				if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
 				else System.out.println("Invalid sleep command.");
 			}
-			default -> replica.processCommand(commandName, args);
+			default -> {
+				// For commands like deposit or addInterest, we need to create a transaction
+				Transaction transaction = new Transaction(commandName + " " + String.join(" ", args), this.replica.getId());
+				this.broadcastTransaction(transaction);
+			}
 		}
 	}
 
+	// Method to get synchronized balance (placeholder)
 	public void getSyncedBalance() {
 		System.out.println("Synchronized balance: [To be implemented]");
 	}
 
+	// Display current group members
 	public void memberInfo() {
 		System.out.println("Current group members: " + group);
 	}
 
+	// Adds a pending transaction (called when receiving a transaction)
 	public void addPending(Transaction transaction) {
 		System.out.println("Processing transaction: " + transaction);
-		broadcastTransaction(transaction);
-		replica.execute(transaction);  // Execute the transaction locally
+		replica.processCommand(transaction.getCommand());  // Process the transaction locally
 	}
 
+	// Broadcast a transaction to all replicas in the group
 	public void broadcastTransaction(Transaction transaction) {
 		SpreadMessage message = new SpreadMessage();
-		message.setFifo(); // Ensure FIFO ordering of messages
-		message.addGroup(group);
+		message.setFifo();  // Ensure FIFO ordering of messages
+		message.addGroup(group);  // Send to all members in the group
+
 		try {
-			message.setObject(transaction);
+			message.setObject(transaction);  // Serialize the transaction into the message
 		} catch (SpreadException e) {
 			e.printStackTrace();
 		}
 
 		try {
-			connection.multicast(message); // Send the transaction to the group
+			connection.multicast(message);  // Send the message to the group
 			System.out.println("Broadcasted transaction: " + transaction);
 		} catch (SpreadException e) {
 			e.printStackTrace();
@@ -106,13 +115,14 @@ public class Client {
 
 	public void sleep(int duration) {
 		try {
-			Thread.sleep(duration * 1000L); // Sleep in seconds
+			Thread.sleep(duration * 1000L);  // Sleep in seconds
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 		System.out.println("Slept for " + duration + " seconds.");
 	}
 
+	// Exit the client and clean up
 	public void exit() {
 		try {
 			group.leave();

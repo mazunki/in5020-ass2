@@ -19,47 +19,13 @@ public class Replica {
         return replicaId;
     }
 
-    public void deposit(BigDecimal amount) {
-        account.deposit(amount);
-        transactionHistory.add("Deposit: " + amount);  // Log transaction
-        System.out.println("Deposit complete. Current balance: " + account.getBalance());
-    }
+    // Process commands sent to this replica
+    public void processCommand(String command) {
+        String[] parts = command.split(" ");
+        String cmd = parts[0];
+        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
 
-    // Process adding interest
-    public void addInterest(int percent) {
-        account.addInterest(percent);
-        transactionHistory.add("Interest: " + percent + "%");  // Log transaction
-        System.out.println("Interest added. Current balance: " + account.getBalance());
-    }
-
-    // Get current balance
-    public BigDecimal getBalance() {
-        System.out.println("Current balance: " + account.getBalance());
-        return account.getBalance();
-    }
-
-    // Return the transaction history
-    public void getHistory() {
-        System.out.println("Transaction History:");
-        for (String entry : transactionHistory) {
-            System.out.println(entry);
-        }
-    }
-
-    // Clear the transaction history
-    public void cleanHistory() {
-        transactionHistory.clear();
-        System.out.println("Transaction history cleaned.");
-    }
-
-    // Execute a transaction (called by the Client)
-    public void execute(Transaction transaction) {
-        transaction.execute(this);
-    }
-
-    // Process a command manually from a file or user input (for batch mode)
-    public void processCommand(String commandName, String[] args) {
-        switch (commandName) {
+        switch (cmd) {
             case "deposit" -> {
                 if (args.length == 1) {
                     deposit(new BigDecimal(args[0]));
@@ -79,6 +45,35 @@ public class Replica {
             case "cleanHistory" -> cleanHistory();
             default -> System.out.println("Unknown command.");
         }
+    }
+
+    public void deposit(BigDecimal amount) {
+        account.deposit(amount);
+        transactionHistory.add("Deposit: " + amount);  // Log transaction
+        System.out.println("Deposit complete. Current balance: " + account.getBalance());
+    }
+
+    public void addInterest(int percent) {
+        account.addInterest(percent);
+        transactionHistory.add("Interest: " + percent + "%");  // Log transaction
+        System.out.println("Interest added. Current balance: " + account.getBalance());
+    }
+
+    public BigDecimal getBalance() {
+        System.out.println("Current balance: " + account.getBalance());
+        return account.getBalance();
+    }
+
+    public void getHistory() {
+        System.out.println("Transaction History:");
+        for (String entry : transactionHistory) {
+            System.out.println(entry);
+        }
+    }
+
+    public void cleanHistory() {
+        transactionHistory.clear();
+        System.out.println("Transaction history cleaned.");
     }
 }
 
