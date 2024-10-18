@@ -5,6 +5,7 @@ import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -224,8 +225,8 @@ public class Client {
 		debug("getting synced balance");
 
 		BigDecimal value;
-		// value = this.getNaiveSyncedBalance();
-		value = this.getOptimizedSyncedBalance();
+		value = this.getNaiveSyncedBalance();
+		// value = this.getOptimizedSyncedBalance();
 
 		System.out.println(value);
 		return value;
