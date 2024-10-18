@@ -1,10 +1,13 @@
 deposit 100
 getQuickBalance
-sleep 2
+sleep 1
 deposit 100
 getQuickBalance
-sleep 2
+sleep 1
 deposit 100
 getQuickBalance
-sleep 2
+sleep 1
+deposit 100
+getQuickBalance
+getSyncedBalance
 exit

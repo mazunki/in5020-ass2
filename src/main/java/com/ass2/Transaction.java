@@ -32,7 +32,7 @@ public class Transaction implements Serializable {
     }
 
 	public void process(Replica replica) {
-		replica.processCommand(this.command);
+		replica.processTransaction(this);
 	}
 
     @Override

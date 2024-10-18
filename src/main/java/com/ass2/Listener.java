@@ -16,10 +16,9 @@ public class Listener implements AdvancedMessageListener {
     @Override
 	public void regularMessageReceived(SpreadMessage message) {
 		try {
-
 			if (message.getObject() instanceof Transaction transaction) {
-				this.client.addPending(transaction);
 				System.err.println("Received transaction: " + transaction);
+				transaction.process(this.client.getReplica());
 			}
 		} catch (SpreadException e) {
 			throw new RuntimeException(e);

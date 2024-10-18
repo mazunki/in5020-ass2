@@ -8,7 +8,9 @@ import java.util.UUID;
 public class Replica {
     private final Account account;
     private final String replicaId;
-    private final List<String> transactionHistory = new ArrayList<>();
+
+    // List to store executed transactions
+    private final List<Transaction> executed = new ArrayList<>();
 
     public Replica(String accountName) {
         this.account = new Account(accountName);
@@ -19,16 +21,18 @@ public class Replica {
         return replicaId;
     }
 
-    // Process commands sent to this replica
-    public void processCommand(String command) {
-        String[] parts = command.split(" ");
-        String cmd = parts[0];
-        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+    // Process the entire transaction instead of just a command string
+    public void processTransaction(Transaction transaction) {
+        String[] args = transaction.commandArgs();
+        String cmd = transaction.commandName();
+
+        System.out.println("EXECUTED: " + transaction.getCommand());
 
         switch (cmd) {
             case "deposit" -> {
                 if (args.length == 1) {
                     deposit(new BigDecimal(args[0]));
+                    executed.add(transaction);  // Log transaction in executed list
                 } else {
                     System.out.println("Invalid deposit command.");
                 }
@@ -36,6 +40,7 @@ public class Replica {
             case "addInterest" -> {
                 if (args.length == 1) {
                     addInterest(Integer.parseInt(args[0]));
+                    executed.add(transaction);  // Log transaction in executed list
                 } else {
                     System.out.println("Invalid interest command.");
                 }
@@ -49,13 +54,11 @@ public class Replica {
 
     public void deposit(BigDecimal amount) {
         account.deposit(amount);
-        transactionHistory.add("Deposit: " + amount);  // Log transaction
         System.out.println("Deposit complete. Current balance: " + account.getBalance());
     }
 
     public void addInterest(int percent) {
         account.addInterest(percent);
-        transactionHistory.add("Interest: " + percent + "%");  // Log transaction
         System.out.println("Interest added. Current balance: " + account.getBalance());
     }
 
@@ -66,14 +69,19 @@ public class Replica {
 
     public void getHistory() {
         System.out.println("Transaction History:");
-        for (String entry : transactionHistory) {
+        for (Transaction entry : executed) {
             System.out.println(entry);
         }
     }
 
     public void cleanHistory() {
-        transactionHistory.clear();
+        executed.clear();
         System.out.println("Transaction history cleaned.");
+    }
+
+    // Return the executed transactions for further usage
+    public List<Transaction> getExecutedTransactions() {
+        return executed;
     }
 }
 
