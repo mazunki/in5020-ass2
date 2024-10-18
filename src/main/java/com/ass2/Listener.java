@@ -1,35 +1,37 @@
 package com.ass2;
 
-import java.util.Arrays;
-
 import spread.AdvancedMessageListener;
-import spread.SpreadException;
+import spread.SpreadGroup;
 import spread.SpreadMessage;
 
 public class Listener implements AdvancedMessageListener {
-	Client client;
 
-	public Listener(Client client) {
-		this.client = client;
-	}
+    private Client client;
+
+    public Listener(Client client) {
+        this.client = client;
+    }
 
     @Override
-	public void regularMessageReceived(SpreadMessage message) {
-		try {
+    public void regularMessageReceived(SpreadMessage message) {
+        try {
+            Transaction transaction = (Transaction) message.getObject();
+            String uniqueId = transaction.getUniqueId();
 
-			if (message.getObject() instanceof Transaction transaction) {
-				this.client.addPending(transaction);
-				System.err.println("Received transaction: " + transaction);
-			}
-		} catch (SpreadException e) {
-			throw new RuntimeException(e);
-		}
-	}
+            System.out.println("Received transaction: " + transaction.getCommand() + " with ID: " + uniqueId);
 
-	@Override
-	public void membershipMessageReceived(SpreadMessage spreadMessage) {
-		System.out.println(Arrays.toString(spreadMessage.getMembershipInfo().getMembers()));
-		//TODO: Handle new clients
-	}
+            // Handle the received transaction (e.g., process and add it to executedList)
+            client.addPending(transaction);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void membershipMessageReceived(SpreadMessage message) {
+        // Handle membership changes here, if needed
+        SpreadGroup group = message.getGroups()[0];
+        System.out.println("Membership change in group: " + group);
+    }
 }
 

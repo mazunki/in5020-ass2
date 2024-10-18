@@ -1,287 +1,255 @@
 package com.ass2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.math.BigDecimal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner; 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import spread.SpreadConnection;
 import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
 
-import java.util.Collections;
+import java.io.*;
+import java.net.InetAddress;
+import java.util.*;
 
-public final class Client implements ClientInterface {
-    private static final String ADDRESS = "127.0.0.1"; // ifi: "129.240.65.59"
-    private static final int PORT = 4803;
+public class Client {
 
-    private final SpreadConnection connection = new SpreadConnection();
-    private final Listener listener;
+    private SpreadConnection connection;
+    private String accountName;
+    private List<Transaction> executedList;
+    private Collection<Transaction> outstandingCollection;
+    private int orderCounter;
+    private int outstandingCounter;
+    private Listener listener;
 
-    private final Collection<Transaction> outstanding;
-    private final List<Transaction> executed;
+    public Client(String serverAddress, String accountName, int numberOfReplicas) {
+        this.accountName = accountName;
+        this.executedList = new ArrayList<>();
+        this.outstandingCollection = new LinkedList<>();
+        this.orderCounter = 0;
+        this.outstandingCounter = 0;
+        this.connection = new SpreadConnection();
 
-    private int order_counter;
-    private int outstanding_counter;
+        // Establish connection to the Spread server
+        try {
+            connection.connect(InetAddress.getByName(serverAddress), 0, "client" + new Random().nextInt(1000), false, true);
+            listener = new Listener(this);
+            connection.add(listener);
 
-    private final String id;
-    private SpreadGroup group;
-    private ScheduledExecutorService scheduler;
+            // Join the group (accountName)
+            SpreadGroup group = new SpreadGroup();
+            group.join(connection, accountName);
 
-    Account account;
+            // Wait for other replicas (based on numberOfReplicas)
+            waitForReplicas(numberOfReplicas);
 
-    // Constructor 1: Common initalization
-    public Client(String spreadAddress, String accountName, int numberOfReplicas) {
-        this.id = String.valueOf((new Random()).nextInt());
-
-        this.outstanding = Collections.synchronizedList(new ArrayList<>());
-        this.executed = Collections.synchronizedList(new ArrayList<>());
-        this.order_counter = 0;
-        this.outstanding_counter = 0;
-
-		this.listener = new Listener(this);
-        this.account = new Account(accountName);
-
-        this.joinGroup(accountName);
-
-        // Schedule periodic broadcasting of outstanding transactions
-        this.scheduleBroadcasting();
+        } catch (SpreadException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    // Constructor 2: Client using a file for batch processing
-    public Client(String spreadAddress, String accountName, int numberOfReplicas, String fileName) {
-        this(spreadAddress, accountName, numberOfReplicas);
-        this.readFromFile(fileName);
+    private void waitForReplicas(int numberOfReplicas) {
+        System.out.println("Waiting for " + numberOfReplicas + " replicas to join...");
+        // Implementation to wait until the required number of replicas have joined
     }
 
-    // Constructor 3: Interactive mode
-    public Client(String spreadAddress, String accountName, int numberOfReplicas, boolean interactive) {
-        this(spreadAddress, accountName, numberOfReplicas);
-        if (!interactive) return;
-    
-        try (Scanner scanner = new Scanner(System.in)) {
+    public void addPending(Transaction transaction) {
+        outstandingCollection.add(transaction);
+        System.out.println("Added to outstanding: " + transaction);
+    }
+
+    public void executeCommand(String commandLine) {
+        String[] parts = commandLine.split(" ");
+        String command = parts[0];
+
+        switch (command) {
+            case "getQuickBalance":
+                getQuickBalance();
+                break;
+            case "getSyncedBalance":
+                getSyncedBalance();
+                break;
+            case "deposit":
+                double amount = Double.parseDouble(parts[1]);
+                deposit(amount);
+                break;
+            case "addInterest":
+                double percent = Double.parseDouble(parts[1]);
+                addInterest(percent);
+                break;
+            case "getHistory":
+                getHistory();
+                break;
+            case "checkTxStatus":
+                String transactionId = parts[1];
+                checkTxStatus(transactionId);
+                break;
+            case "cleanHistory":
+                cleanHistory();
+                break;
+            case "memberInfo":
+                memberInfo();
+                break;
+            case "sleep":
+                try {
+                    Thread.sleep((long) (Double.parseDouble(parts[1]) * 1000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "exit":
+                System.out.println("Exiting client...");
+                disconnect();
+                System.exit(0);
+                break;
+            default:
+                System.out.println("Unknown command: " + command);
+        }
+    }
+
+    // Command implementations
+
+    private void getQuickBalance() {
+        System.out.println("Quick balance: " + calculateBalance(false));
+    }
+
+    private void getSyncedBalance() {
+        // Stronger consistency
+        processOutstandingTransactions();
+        System.out.println("Synced balance: " + calculateBalance(true));
+    }
+
+    private void deposit(double amount) {
+        Transaction transaction = new Transaction("deposit " + amount, generateTransactionId());
+        addOutstandingTransaction(transaction);
+    }
+
+    private void addInterest(double percent) {
+        Transaction transaction = new Transaction("addInterest " + percent, generateTransactionId());
+        addOutstandingTransaction(transaction);
+    }
+
+    private void getHistory() {
+        System.out.println("Executed transactions:");
+        for (int i = 0; i < executedList.size(); i++) {
+            System.out.println((orderCounter - executedList.size() + i + 1) + ". " + executedList.get(i));
+        }
+        System.out.println("Outstanding transactions: " + outstandingCollection);
+    }
+
+    private void checkTxStatus(String transactionId) {
+        boolean found = executedList.stream().anyMatch(tx -> tx.getUniqueId().equals(transactionId)) ||
+                outstandingCollection.stream().anyMatch(tx -> tx.getUniqueId().equals(transactionId));
+        System.out.println("Transaction status: " + (found ? "found" : "not found"));
+    }
+
+    private void cleanHistory() {
+        executedList.clear();
+        System.out.println("History cleaned.");
+    }
+
+    private void memberInfo() {
+        // Handled in Listener.java
+    }
+
+    private void addOutstandingTransaction(Transaction transaction) {
+        outstandingCollection.add(transaction);
+        broadcastTransaction(transaction);
+    }
+
+    private void broadcastTransaction(Transaction transaction) {
+        try {
+            SpreadMessage message = new SpreadMessage();
+            message.setReliable();
+            message.addGroup(accountName);
+            message.setObject(transaction);  // Broadcast the whole transaction object
+            connection.multicast(message);
+        } catch (SpreadException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String generateTransactionId() {
+        return "client-" + outstandingCounter++;
+    }
+
+    private double calculateBalance(boolean synced) {
+        // Apply all executed transactions
+        double balance = 0.0;
+        for (Transaction tx : executedList) {
+            balance = applyTransaction(balance, tx);
+        }
+
+        if (!synced) {
+            // For quick balance, apply outstanding transactions locally
+            for (Transaction tx : outstandingCollection) {
+                balance = applyTransaction(balance, tx);
+            }
+        }
+        return balance;
+    }
+
+    private double applyTransaction(double balance, Transaction transaction) {
+        if (transaction.getCommand().startsWith("deposit")) {
+            double amount = Double.parseDouble(transaction.getCommand().split(" ")[1]);
+            balance += amount;
+        } else if (transaction.getCommand().startsWith("addInterest")) {
+            double percent = Double.parseDouble(transaction.getCommand().split(" ")[1]);
+            balance *= (1 + percent / 100);
+        }
+        return balance;
+    }
+
+    private void processOutstandingTransactions() {
+        // Synchronize outstanding transactions
+        while (!outstandingCollection.isEmpty()) {
+            Transaction tx = ((LinkedList<Transaction>) outstandingCollection).poll();
+            executedList.add(tx);
+            orderCounter++;
+        }
+    }
+
+    private void disconnect() {
+        try {
+            connection.disconnect();
+        } catch (SpreadException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Listener getListener() {
+        return listener;
+    }
+
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Usage: java Client <server_address> <account_name> <number_of_replicas> [<file_name>]");
+            return;
+        }
+
+        String serverAddress = args[0];
+        String accountName = args[1];
+        int numberOfReplicas = Integer.parseInt(args[2]);
+
+        Client client = new Client(serverAddress, accountName, numberOfReplicas);
+
+        // Command-line or batch processing
+        if (args.length == 4) {
+            String fileName = args[3];
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+                String command;
+                while ((command = reader.readLine()) != null) {
+                    client.executeCommand(command);
+                    Thread.sleep((long) (500 + Math.random() * 1000));
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Scanner scanner = new Scanner(System.in);
             while (true) {
-                String line = scanner.nextLine();
-                if (line.equals("exit")) {
-                    this.exit();
-                    break;
-                }
-				this.handleMessage(line);
+                System.out.print("> ");
+                String command = scanner.nextLine();
+                client.executeCommand(command);
             }
         }
     }
-
-    // Handle reading commands from a file
-    private void readFromFile(String fileName) {
-        try {
-            File myObj = new File(fileName);
-            try (Scanner myReader = new Scanner(myObj)) {
-                while (myReader.hasNextLine()) {
-                    String data = myReader.nextLine();
-					this.handleMessage(data);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + fileName);
-        }
-    }
-
-	// Handle incoming messages
-	public void handleMessage(String message) {
-		System.out.println("Handling string: " + message);
-		Transaction transaction = new Transaction(message, this.id + " " + this.outstanding_counter);
-		this.outstanding_counter++;
-		this.outstanding.add(transaction);
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException ex) {
-        }
-	}
-
-    // Join Spread group
-    private void joinGroup(String accountName) {
-        try {
-            this.connection.add(this.listener);
-            this.connection.connect(InetAddress.getByName(Client.ADDRESS), Client.PORT, this.id, false, true);
-
-            this.group = new SpreadGroup();
-            group.join(this.connection, accountName);
-        } catch (SpreadException | UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-	private void broadcastTransaction(Transaction transaction){
-			try {
-				SpreadMessage message = new SpreadMessage();
-				message.addGroup(this.group);
-				message.setFifo();
-
-				message.setObject(transaction); // Send a copy of the outstanding collection
-				message.setSelfDiscard(true);
-				
-				this.connection.multicast(message);
-				System.err.println("Broadcasted transaction: " + transaction);
-
-			} catch (SpreadException e) {
-				System.err.println("Error broadcasting transaction: " + e.getMessage());
-			}
-	}
-
-	private void broadcastAllTransactions(){
-		System.err.println("Broadcasting all outstanding transactions: " + this.outstanding.size());
-
-		HashSet<Transaction> toRemove = new HashSet<>();
-
-		for (Transaction transaction : this.outstanding) {
-			if (this.executed.contains(transaction)) {
-				toRemove.add(transaction);
-			}
-			if (!transaction.getClientName().equals(this.id)) {
-				// System.err.println("Skipping broadcast of foreign: " + transaction);
-				continue;
-			}
-
-			this.broadcastTransaction(transaction);
-		}
-		this.outstanding.removeAll(toRemove);
-	}
-
-    // Schedule periodic broadcasting of outstanding transactions called every 10 seconds
-    private void scheduleBroadcasting() {
-		System.err.println("initiating scheduler");
-
-        this.scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(this::broadcastAllTransactions, 0, 10, TimeUnit.SECONDS);  
-    }
-	// Add transaction to outstanding collection
-	public synchronized void addPending(Transaction transaction){
-		System.err.println("adding outstanding transaction: " + transaction);
-		for (Transaction known : this.executed) {
-			if (known.getId().equals(transaction.getId())) return;
-		}
-		for (Transaction known : this.outstanding) {
-			if (known.getId().equals(transaction.getId())) return;
-		}
-
-		this.outstanding.add(transaction);
-		this.outstanding_counter++;
-	}
-
-	public synchronized void processOutstanding() {
-		while (true) {
-			Transaction transaction = this.getFirstSorted();
-
-			if (transaction == null) continue;  // nothing to read yet
-
-			System.out.println("Executing: " + transaction);
-			transaction.execute(this);
-			this.executed.add(transaction);
-		}
-	}
-
-	private synchronized Transaction getFirstSorted() {
-		Transaction first = null;
-		for (Transaction transaction : this.outstanding) {
-			if (!this.executed.contains(transaction)) {
-				if (first == null || transaction.getId().compareTo(first.getId()) < 0) {
-					first = transaction;
-				}
-			}
-		}
-		return first;
-	}
-
-	@Override
-	public BigDecimal getQuickBalance() {
-		BigDecimal balance = this.account.getBalance();
-		System.out.println("Quick balance: " + balance);
-		return balance;
-	}
-
-	@Override
-	public BigDecimal getSyncedBalance(){
-		// TODO: actually sync balance
-		BigDecimal balance = this.account.getBalance();
-		System.out.println("Synced balance (NYI lmao): " + balance);
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<Transaction> getHistory(){
-		return this.executed;
-	}
-
-	@Override
-	public boolean checkTxStatus(String transactionId){
-		for (Transaction transaction : this.outstanding) {
-			if (transaction.getId().equals(transactionId)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public void cleanHistory(){
-		this.executed.clear();
-	}
-
-	@Override
-	public Collection<String> memberInfo(){
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public  void sleep(int seconds){
-		try {
-			Thread.sleep(seconds * 1000);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public  void exit(){
-		try {
-			this.connection.remove(this.listener);
-			this.connection.disconnect();
-			System.out.println(this.id + " disconnected");	
-		} catch (SpreadException e) {
-			throw new RuntimeException(e);
-
-		}
-
-		if (this.scheduler != null && !this.scheduler.isShutdown()) {
-			this.scheduler.shutdown();
-		}
-	}
-
-	public static void main(String[] args) throws InterruptedException {
-		/*
-			Usage of the Client class (args):
-				Client spreadAddress accountName numberOfReplicas fileName
-				Client spreadAddress accountName numberOfReplicas
-		*/
-		Client client;
-
-		switch (args.length) {
-			case 4 -> client = new Client(args[0], args[1], Integer.parseInt(args[2]), args[3]);
-			case 3 -> client = new Client(args[0], args[1], Integer.parseInt(args[2]), true);
-			default -> throw new IllegalArgumentException("Invalid number of arguments");
-		}
-
-		client.processOutstanding();
-	}
 }
+
