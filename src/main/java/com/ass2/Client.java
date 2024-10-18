@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client {
 	private SpreadConnection connection;
@@ -16,7 +18,7 @@ public class Client {
 	private SpreadGroup group;
 	Listener listener;
 
-	public Client(InetAddress serverAddress, String accountName, String filename) {
+	public Client(InetAddress serverAddress, String accountName) {
 		this.replica = new Replica(accountName);
 
 		try {
@@ -31,17 +33,14 @@ public class Client {
 			this.listener = new Listener(this);
 			connection.add(listener);
 
-			if (filename != null) {
-				loadCommandsFromFile(filename);
-			}
-
 		} catch (SpreadException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 	}
 
-	private void loadCommandsFromFile(String filename) {
+	// Method to load commands from a file
+	public void loadCommandsFromFile(String filename) {
 		try (Scanner scanner = new Scanner(new java.io.File(filename))) {
 			while (scanner.hasNextLine()) {
 				this.parseInputLine(scanner.nextLine());
@@ -51,6 +50,7 @@ public class Client {
 		}
 	}
 
+	// Parsing and processing each line from the input file
 	private void parseInputLine(String line) {
 		String[] parts = line.split(" ");
 		String cmdName = parts[0];
@@ -125,6 +125,7 @@ public class Client {
 		System.exit(0);
 	}
 
+	// Main method to run the Client and use multithreading for command loading
 	public static void main(String[] args) throws UnknownHostException {
 		if (args.length < 3 || args.length > 4) {
 			System.out.println("Usage: java Client <server> <account> <no_replicas> [filename]");
@@ -137,10 +138,24 @@ public class Client {
 		String filename = (args.length == 4) ? args[3] : null;  // Optional filename for batch mode
 
 		InetAddress address = InetAddress.getByName(serverAddress);
+		Client[] clients = new Client[noOfReplicas];
 
+		// Create a thread pool to run each Client in its own thread
+		ExecutorService executorService = Executors.newFixedThreadPool(noOfReplicas);
+
+		// Submit each client to the thread pool
 		for (int i = 0; i < noOfReplicas; i++) {
-			new Client(address, accountName, filename);
+			final int index = i;
+			executorService.submit(() -> {
+				clients[index] = new Client(address, accountName);
+				if (filename != null) {
+					clients[index].loadCommandsFromFile(filename);
+				}
+			});
 		}
+
+		// Graceful shutdown of the ExecutorService
+		executorService.shutdown();
 	}
 }
 
