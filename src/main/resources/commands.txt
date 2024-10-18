@@ -1,4 +1,10 @@
 deposit 100
-addInterest 10
 getQuickBalance
-getSyncedBalance
+sleep 2
+deposit 100
+getQuickBalance
+sleep 2
+deposit 100
+getQuickBalance
+sleep 2
+exit

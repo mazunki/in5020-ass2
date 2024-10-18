@@ -20,6 +20,7 @@ import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
 
+import java.util.Collections;
 
 public final class Client implements ClientInterface {
     private static final String ADDRESS = "127.0.0.1"; // ifi: "129.240.65.59"
@@ -44,8 +45,8 @@ public final class Client implements ClientInterface {
     public Client(String spreadAddress, String accountName, int numberOfReplicas) {
         this.id = String.valueOf((new Random()).nextInt());
 
-        this.outstanding = new HashSet<>();
-        this.executed = new ArrayList<>();
+        this.outstanding = Collections.synchronizedList(new ArrayList<>());
+        this.executed = Collections.synchronizedList(new ArrayList<>());
         this.order_counter = 0;
         this.outstanding_counter = 0;
 
@@ -144,17 +145,15 @@ public final class Client implements ClientInterface {
 		HashSet<Transaction> toRemove = new HashSet<>();
 
 		for (Transaction transaction : this.outstanding) {
+			if (this.executed.contains(transaction)) {
+				toRemove.add(transaction);
+			}
 			if (!transaction.getClientName().equals(this.id)) {
 				// System.err.println("Skipping broadcast of foreign: " + transaction);
 				continue;
 			}
 
-			System.err.println("Broadcasting transaction: " + transaction);
 			this.broadcastTransaction(transaction);
-
-			if (this.executed.contains(transaction)) {
-				toRemove.add(transaction);
-			}
 		}
 		this.outstanding.removeAll(toRemove);
 	}
@@ -169,32 +168,49 @@ public final class Client implements ClientInterface {
 	// Add transaction to outstanding collection
 	public synchronized void addPending(Transaction transaction){
 		System.err.println("adding outstanding transaction: " + transaction);
+		for (Transaction known : this.executed) {
+			if (known.getId().equals(transaction.getId())) return;
+		}
+		for (Transaction known : this.outstanding) {
+			if (known.getId().equals(transaction.getId())) return;
+		}
+
 		this.outstanding.add(transaction);
 		this.outstanding_counter++;
 	}
 
-	// Execute event in outstanding collection  	
-	private void processOutstanding(){
-        // TODO: Sort outstanding transactions by vector id
-        
-        for (Transaction transaction : this.outstanding) {
-            if (this.executed.contains(transaction)){
-                continue;
-            }
-            
-            transaction.execute(this);
-            this.executed.add(transaction);
-        }		
+	public synchronized void processOutstanding() {
+		while (true) {
+			Transaction transaction = this.getFirstSorted();
+
+			if (transaction == null) continue;  // nothing to read yet
+
+			System.out.println("Executing: " + transaction);
+			transaction.execute(this);
+			this.executed.add(transaction);
+		}
 	}
 
-    @Override
+	private synchronized Transaction getFirstSorted() {
+		Transaction first = null;
+		for (Transaction transaction : this.outstanding) {
+			if (!this.executed.contains(transaction)) {
+				if (first == null || transaction.getId().compareTo(first.getId()) < 0) {
+					first = transaction;
+				}
+			}
+		}
+		return first;
+	}
+
+	@Override
 	public BigDecimal getQuickBalance() {
 		BigDecimal balance = this.account.getBalance();
 		System.out.println("Quick balance: " + balance);
 		return balance;
 	}
 
-    @Override
+	@Override
 	public BigDecimal getSyncedBalance(){
 		// TODO: actually sync balance
 		BigDecimal balance = this.account.getBalance();
@@ -202,12 +218,12 @@ public final class Client implements ClientInterface {
 		throw new UnsupportedOperationException();
 	}
 
-    @Override
+	@Override
 	public List<Transaction> getHistory(){
 		return this.executed;
 	}
 
-    @Override
+	@Override
 	public boolean checkTxStatus(String transactionId){
 		for (Transaction transaction : this.outstanding) {
 			if (transaction.getId().equals(transactionId)) {
@@ -217,17 +233,17 @@ public final class Client implements ClientInterface {
 		return true;
 	}
 
-    @Override
+	@Override
 	public void cleanHistory(){
 		this.executed.clear();
 	}
 
-    @Override
+	@Override
 	public Collection<String> memberInfo(){
 		throw new UnsupportedOperationException();
 	}
 
-    @Override
+	@Override
 	public  void sleep(int seconds){
 		try {
 			Thread.sleep(seconds * 1000);
@@ -236,7 +252,7 @@ public final class Client implements ClientInterface {
 		}
 	}
 
-    @Override
+	@Override
 	public  void exit(){
 		try {
 			this.connection.remove(this.listener);
@@ -255,7 +271,7 @@ public final class Client implements ClientInterface {
 	public static void main(String[] args) throws InterruptedException {
 		/*
 			Usage of the Client class (args):
-		 		Client spreadAddress accountName numberOfReplicas fileName
+				Client spreadAddress accountName numberOfReplicas fileName
 				Client spreadAddress accountName numberOfReplicas
 		*/
 		Client client;
