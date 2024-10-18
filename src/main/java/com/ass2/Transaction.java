@@ -1,7 +1,6 @@
 package com.ass2;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 public class Transaction implements Serializable {
     private String command;

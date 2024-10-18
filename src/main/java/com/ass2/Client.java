@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.StringJoiner;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,17 +32,16 @@ public class Client {
     // Add a scheduled executor for broadcasting every 10 seconds
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public Client(InetAddress serverAddress, String accountName) {
-        this.replica = new Replica(accountName);
-
+    public Client(InetAddress serverAddress, String accountName, String replicaName) {
+        this.replica = new Replica(accountName, replicaName);
         try {
             connection = new SpreadConnection();
             connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
-            System.out.println("Connected to Spread server at: " + serverAddress);
+            debug("Connected to Spread server at: " + serverAddress);
 
             group = new SpreadGroup();
             group.join(connection, accountName);
-            System.out.println("Joined group: " + accountName);
+            debug("Joined group: " + accountName);
 
             this.listener = new Listener(this);
             connection.add(listener);
@@ -52,10 +53,14 @@ public class Client {
             e.printStackTrace();
             System.exit(1);
         }
+	}
+    public Client(InetAddress serverAddress, String accountName) {
+        this(serverAddress, accountName, UUID.randomUUID().toString().substring(0, 6));
     }
 
     // Method to load commands from a file
     public void loadCommandsFromFile(String filename) {
+		debug("reading from " + filename);
         try (Scanner scanner = new Scanner(new java.io.File(filename))) {
             while (scanner.hasNextLine()) {
                 this.parseInputLine(scanner.nextLine());
@@ -86,6 +91,7 @@ public class Client {
             case "getSyncedBalance" -> this.getSyncedBalance();
             case "memberInfo" -> this.memberInfo();
             case "exit" -> this.exit();
+			case "getHistory" -> this.getHistory();
             case "sleep" -> {
                 if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
                 else System.out.println("Invalid sleep command.");
@@ -99,22 +105,57 @@ public class Client {
         }
     }
 
-    // Adds a pending transaction to the outstanding collection
     public void addPending(Transaction transaction) {
-        System.out.println("Added to pending: " + transaction);
+        debug("Added to pending: " + transaction);
         outstanding.add(transaction);
     }
 
-    // Method to get synchronized balance (placeholder)
-    public BigDecimal getSyncedBalance() {
-        System.out.println("Synchronized balance: [To be implemented]");
-		this.sleep(10);
-		return this.replica.getBalance();
+    public void getHistory() {
+		StringJoiner sj = new StringJoiner("; ");
+        for (Transaction entry : this.replica.getExecutedTransactions()) {
+            sj.add(entry.toString());
+        }
+        for (Transaction entry : this.outstanding) {
+            sj.add(entry.toString());
+        }
+        debug("transaction history: " + sj);
+		System.out.println(sj);
     }
+
+	public BigDecimal getOptimizedSyncedBalance() {
+		// TODO: fix this shit
+		return this.getNaiveSyncedBalance();
+	}
+
+    public BigDecimal getNaiveSyncedBalance() {
+		debug("syncing balance");
+
+		while (this.outstanding.size() != 0) {
+			Thread.yield();
+		}
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		BigDecimal value = this.replica.getQuickBalance();
+		debug("naiveSyncedBalance: " + value);
+
+		return value;
+    }
+
+	public BigDecimal getSyncedBalance() {
+		BigDecimal value = this.getNaiveSyncedBalance();
+		System.out.println(value);
+		return value;
+	}
+
 
     // Display current group members
     public void memberInfo() {
-        System.out.println("Current group members: " + group);
+		debug("memberInfo: " + group);
+        System.out.println(group);
     }
 
     // Broadcast all outstanding transactions
@@ -134,28 +175,28 @@ public class Client {
         try {
             message.setObject(transaction);  // Serialize the transaction into the message
             connection.multicast(message);  // Send the message to the group
-            System.out.println("Broadcasted transaction: " + transaction);
+            debug("broadcasted transaction: " + transaction);
         } catch (SpreadException e) {
             e.printStackTrace();
         }
     }
 
     public void sleep(int duration) {
+        debug("sleeping for " + duration + "s");
         try {
-            Thread.sleep(duration * 1000L);  // Sleep in seconds
+            Thread.sleep(duration * 1000L);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        System.out.println("Slept for " + duration + " seconds.");
+        debug("woke up from sleep");
     }
 
-    // Exit the client and clean up
     public void exit() {
+		debug("exiting...");
         try {
             group.leave();
             this.connection.remove(this.listener);
             connection.disconnect();
-            System.out.println("Client exited.");
         } catch (SpreadException e) {
             e.printStackTrace();
         }
@@ -165,54 +206,16 @@ public class Client {
 		} catch (InterruptedException e) {
 			System.err.println(this + ": Couldn't properly send all outstanding transactions");
 		}
+		debug("we gone");
     }
 
 	public String toString() {
 		return "Client<" + this.replica.getId() + ">";
 	}
 
-    // Main method to run the Client and use multithreading for command loading
-    public static void main(String[] args) throws UnknownHostException {
-        if (args.length < 3 || args.length > 4) {
-            System.out.println("Usage: java Client <server> <account> <no_replicas> [filename]");
-            return;
-        }
+	public void debug(String s) {
+		System.err.println("Client[" + this.getReplica().getId() + "]: " + s);
+	}
 
-        String serverAddress = args[0];  // Server address
-        String accountName = args[1];    // Account name for the replica group
-        int noOfReplicas = Integer.parseInt(args[2]);  // Number of replicas
-        String filename = (args.length == 4) ? args[3] : null;  // Optional filename for batch mode
-
-        InetAddress address = InetAddress.getByName(serverAddress);
-        Client[] clients = new Client[noOfReplicas];
-
-        // Create a thread pool to run each Client in its own thread
-        ExecutorService executorService = Executors.newFixedThreadPool(noOfReplicas);
-
-        // Submit each client to the thread pool
-        for (int i = 0; i < noOfReplicas; i++) {
-            final int index = i;
-            executorService.submit(() -> {
-                clients[index] = new Client(address, accountName);
-                if (filename != null) {
-                    clients[index].loadCommandsFromFile(filename);
-                }
-            });
-        }
-
-        // Graceful shutdown of the ExecutorService
-        executorService.shutdown();
-
-		try {
-			executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-		}
-
-		System.out.println("ponies");
-
-		for (Client client : clients) {
-			System.out.println(client.toString() + " final balance: " + client.getSyncedBalance());
-		}
-    }
 }
 

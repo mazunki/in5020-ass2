@@ -12,7 +12,7 @@ public class Account implements TransactionInterface {
         this.balance = new BigDecimal(0);
     }
 
-    public BigDecimal getBalance() {
+    public BigDecimal getQuickBalance() {
         return balance;
     }
 

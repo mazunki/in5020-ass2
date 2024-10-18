@@ -3,7 +3,6 @@ package com.ass2;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class Replica {
     private final Account account;
@@ -12,9 +11,9 @@ public class Replica {
     // List to store executed transactions
     private final List<Transaction> executed = new ArrayList<>();
 
-    public Replica(String accountName) {
+    public Replica(String accountName, String replicaName) {
         this.account = new Account(accountName);
-        this.replicaId = accountName + "-" + UUID.randomUUID().toString().substring(0, 6);
+		this.replicaId = replicaName;
     }
 
     public String getId() {
@@ -25,8 +24,6 @@ public class Replica {
     public void processTransaction(Transaction transaction) {
         String[] args = transaction.commandArgs();
         String cmd = transaction.commandName();
-
-        System.out.println("EXECUTED: " + transaction.getCommand());
 
         switch (cmd) {
             case "deposit" -> {
@@ -45,41 +42,56 @@ public class Replica {
                     System.out.println("Invalid interest command.");
                 }
             }
-            case "getQuickBalance" -> getBalance();
-            case "getHistory" -> getHistory();
+            case "checkTxStatus" -> checkTxStatus(args);
+            case "getQuickBalance" -> getQuickBalance();
             case "cleanHistory" -> cleanHistory();
-            default -> System.out.println("Unknown command.");
+            default -> System.err.println("Unknown command.");
         }
     }
 
+	public boolean checkTxStatus(String[] transactionUniqueId) {
+		String txId = String.join(" ", transactionUniqueId);
+
+		boolean found = false;
+		for (Transaction t : this.executed) {
+			if (t.getId().equals(txId)) {
+				found = true;
+				break;
+			}
+		}
+
+		debug(transactionUniqueId + " was found: " + found);
+		System.out.println(found);
+
+		return found;
+	}
+
     public void deposit(BigDecimal amount) {
+		debug("depositing " + amount);
         account.deposit(amount);
-        System.out.println("Deposit complete. Current balance: " + account.getBalance());
     }
 
     public void addInterest(int percent) {
+		debug("depositing " + percent + "%");
         account.addInterest(percent);
-        System.out.println("Interest added. Current balance: " + account.getBalance());
     }
 
-    public BigDecimal getBalance() {
-        System.out.println("Current balance: " + account.getBalance());
-        return account.getBalance();
-    }
-
-    public void getHistory() {
-        System.out.println("Transaction History:");
-        for (Transaction entry : executed) {
-            System.out.println(entry);
-        }
+    public BigDecimal getQuickBalance() {
+		BigDecimal value = account.getQuickBalance();
+		debug("quickBalance: " + value);
+		System.out.println(value);
+        return value;
     }
 
     public void cleanHistory() {
         executed.clear();
-        System.out.println("Transaction history cleaned.");
+        debug("transaction history cleaned");
     }
 
-    // Return the executed transactions for further usage
+	public void debug(String s) {
+		System.err.println("Replica[" + this.getId() + "]: " + s);
+	}
+
     public List<Transaction> getExecutedTransactions() {
         return executed;
     }

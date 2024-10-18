@@ -17,7 +17,6 @@ public class Listener implements AdvancedMessageListener {
 	public void regularMessageReceived(SpreadMessage message) {
 		try {
 			if (message.getObject() instanceof Transaction transaction) {
-				System.err.println("Received transaction: " + transaction);
 				transaction.process(this.client.getReplica());
 			}
 		} catch (SpreadException e) {
