@@ -19,6 +19,8 @@ public class Client {
     private int outstandingCounter;
     private Listener listener;
 
+    String clientName = "client-" + UUID.randomUUID().toString().substring(0, 7);
+
     public Client(String serverAddress, String accountName, int numberOfReplicas) {
         this.accountName = accountName;
         this.executedList = new ArrayList<>();
@@ -167,7 +169,7 @@ public class Client {
     }
 
     private String generateTransactionId() {
-        return "client-" + outstandingCounter++;
+        return clientName + " " + outstandingCounter++;
     }
 
     private double calculateBalance(boolean synced) {
