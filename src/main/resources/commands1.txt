@@ -20,6 +20,9 @@ deposit 100
 getQuickBalance  # 600
 
 sleep 4  # 12 seconds == second round
+cleanHistory
+getHistory
+
 
 getQuickBalance  # 6xx
 deposit 100
@@ -28,6 +31,9 @@ getSyncedBalance # 6yy
 
 cleanHistory
 deposit 100
+
+cleanHistory
+getHistory
 
 # bye bye
 getSyncedBalance

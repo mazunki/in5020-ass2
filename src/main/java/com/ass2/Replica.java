@@ -23,6 +23,10 @@ public class Replica {
         return replicaId;
     }
 
+	public int getOrderCounter() {
+		return this.order_counter;
+	}
+
     // Process the entire transaction instead of just a command string
     public void processTransaction(Transaction transaction) {
         String[] args = transaction.commandArgs();

@@ -114,7 +114,7 @@ public class Client {
 			case "gethistory", "history" -> this.getHistory();
 			case "sleep" -> {
 				if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
-				else System.out.println("Invalid sleep command.");
+				else System.err.println("Invalid sleep command.");
 			}
 			default -> {
 				Transaction transaction = this.replica.makeTransaction(commandName, args, this.outstanding_counter);
@@ -135,10 +135,12 @@ public class Client {
 		for (Transaction entry : this.replica.getExecutedTransactions()) {
 			sj.add(entry.toString());
 		}
+		// we think it's a bit weird that the history includes things that aren't actually applied yet
 		for (Transaction entry : this.outstanding) {
 			sj.add(entry.toString());
 		}
-		debug("transaction history: " + sj);
+		int firstOrderCounter = this.replica.getOrderCounter() - this.replica.getExecutedTransactions().size() + 1;
+		debug("transaction history: (#" + firstOrderCounter +  ") " + sj);
 		System.out.println(sj);
 	}
 
@@ -152,7 +154,6 @@ public class Client {
 		Transaction transaction = this.replica.makeTransaction("getSyncedBalance", new String[0], this.outstanding_counter);
 		this.outstanding_counter++;
 		this.addPending(transaction);
-		
 	}
 
 	public void completeSync() {
@@ -163,7 +164,9 @@ public class Client {
 		waitingForSync = true;
 		this.requestSyncBalance();
 
-		while (waitingForSync) { }
+		while (waitingForSync) {
+			Thread.yield();
+		}
 
 		BigDecimal value = this.replica.getQuickBalance();
 		waitingForSync = false;
@@ -188,7 +191,7 @@ public class Client {
 		return value;
 	}
 
-	public synchronized BigDecimal getSyncedBalance() {
+	public BigDecimal getSyncedBalance() {
 		debug("getting synced balance");
 
 		BigDecimal value;
