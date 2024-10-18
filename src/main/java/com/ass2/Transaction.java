@@ -44,27 +44,14 @@ public class Transaction implements Serializable {
                     System.out.println("Invalid number of arguments for deposit.");
                 }
             }
-            case "interest" -> {
+            case "addInterest" -> {
                 if (parts.length == 2) {
                     replica.addInterest(Integer.parseInt(parts[1]));
                 } else {
                     System.out.println("Invalid number of arguments for interest.");
                 }
             }
-            case "getQuickBalance", "balance" -> replica.getBalance();
-            case "getSyncedBalance" -> replica.getSyncedBalance();
             case "getHistory" -> replica.getHistory();
-            case "cleanHistory" -> replica.cleanHistory();
-            case "sleep" -> {
-                if (parts.length == 2) {
-                    replica.sleep(Integer.parseInt(parts[1]));
-                } else {
-                    System.out.println("Invalid sleep command.");
-                }
-            }
-            case "exit" -> {
-				System.exit(0);
-			}
             default -> System.out.println("Unknown command: " + command);
         }
     }
