@@ -11,7 +11,6 @@ public class Transaction implements Serializable {
         this.id = id;
     }
 
-    // Getter methods for command and id
     public String getId() {
         return id;
     }
@@ -29,15 +28,27 @@ public class Transaction implements Serializable {
         return parts[0];
     }
 
+    // Makes a list of the arguments of the provided command
     public String[] commandArgs() {
-        String[] parts = command.split(" ");
+        String[] parts = command.split(" ", 1);
         return parts.length > 1 ? parts[1].split(" ") : new String[0];
     }
 
+    /*
+     * used by the Spread Listener when messsages are
+     * received and they are transactions
+     * 
+     * @param client the client that received the transaction
+    **/
 	public void process(Client client) {
 		Replica replica = client.getReplica();
 
-		if (this.commandName().equals("getSyncedBalance")) {
+		/*
+         * getSyncedBalance is treated differently because 
+         * it's never intended for the replica so we just 
+         * return to the client which requested a sync. 
+        **/
+        if (this.commandName().equals("getSyncedBalance")) {
 			if (this.getReplicaId().equals(replica.getId())) {
 				client.completeSync();
 				return;

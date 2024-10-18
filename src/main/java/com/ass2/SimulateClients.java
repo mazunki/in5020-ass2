@@ -6,6 +6,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/*
+ * Runs a couple of clients on different threads and waits for them to finish
+ * @param serverAddress The address of the spread server
+ * @param accountName The name of the account to use
+ * @param noOfReplicas The number of replicas to simulate
+ * @param pathToCommands The directory path to the command files
+ *                       this directory should contain files named Rep1.txt, Rep2.txt, etc.
+**/
 public class SimulateClients {
 
     public static void main(String[] args) throws UnknownHostException, InterruptedException {
@@ -14,8 +22,8 @@ public class SimulateClients {
             return;
         }
 
-        String serverAddress = args[0];  // Server address
-        String accountName = args[1];    // Account name for the replica group
+        String serverAddress = args[0];
+        String accountName = args[1];
         int noOfReplicas = Integer.parseInt(args[2]);
         String pathToCommands = args[3];
 
@@ -28,10 +36,14 @@ public class SimulateClients {
         // Create a thread pool to run each Client in its own thread
         ExecutorService executorService = Executors.newFixedThreadPool(noOfReplicas);
 
-        // Submit each client to the thread pool with their respective commands file
+        /*
+         * First we start up two clients, then we wait for 15 seconds and then we start the rest
+
+         * for each client we use the same address and account name, but the command file will instead be 
+         * Rep1.txt, Rep2.txt, etc. found in the pathToCommands directory
+        **/
         for (int i = 0; i < 2; i++) {
             final int index = i;
-			System.out.println("building new");
             executorService.submit(() -> {
                 String commandFile = commandPrefix + (index + 1) + commandSuffix;
                 clients[index] = new Client(address, accountName, "Rep" + (index + 1));
@@ -50,16 +62,17 @@ public class SimulateClients {
             });
         }
 
-
+        // We do not need to submit any more tasks to the executor
         executorService.shutdown();
+
+        // Wait for all thread on clients to finish
         try {
             if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
 				executorService.shutdownNow();
 			}
         } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-
+        
         for (Client client : clients) {
             System.out.println(client.toString() + " final balance: " + client.getReplica().getQuickBalance());
         }

@@ -7,11 +7,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/*
+ * A replica is the underlying implementation for a client without
+ * network awareness and thus does not handle broadcasting nor
+ * synchronization
+**/
 public class Replica {
     private final Account account;
     private final String replicaId;
 
-    // List to store executed transactions
     private final List<Transaction> executed = new ArrayList<>();
 	private int order_counter = 0;
 
@@ -28,7 +32,14 @@ public class Replica {
 		return this.order_counter;
 	}
 
-    // Process the entire transaction instead of just a command string
+	/*
+	 * Manly used by the client listener to recive transactions.
+	 *
+	 * We execute tasks, add it to our history, and count it. Some transactions are not
+	 * added to the history and are not counted either.
+	 * 
+	 * This method also called by the client directly when doing synchronization.
+	**/
     public void processTransaction(Transaction transaction) {
         String[] args = transaction.commandArgs();
         String cmd = transaction.commandName();
@@ -64,6 +75,10 @@ public class Replica {
         }
     }
 
+	/*
+	 * Used by the client to build a new transaction from a command. The caller is responsible
+	 * for incrementing the counter.
+	**/
 	public Transaction makeTransaction(String commandName, String[] args, int counter) {
 		String cmd;
 		String commandArgs = String.join(" ", args);
@@ -98,7 +113,8 @@ public class Replica {
 		}
 		return found;
 	}
-
+	
+	// Check if the transaction exist in our history
 	public boolean checkTxStatus(String transactionUniqueId) {
 		boolean found = this.checkTxStatusImpl(transactionUniqueId);
 		debug("checking for " + transactionUniqueId);
@@ -134,7 +150,10 @@ public class Replica {
     public List<Transaction> getExecutedTransactions() {
         return executed;
     }
-
+	/*
+	 * Allows us to run the replica as a standalone instance. Follows similar
+	 * input handling as an interactive client.
+	**/
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println("Usage: java Replica <accountName>");

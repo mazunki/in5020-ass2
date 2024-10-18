@@ -24,13 +24,14 @@ public class Client {
 	private SpreadGroup group;
 	Listener listener;
 
-	// Add this collection to store the outstanding transactions
 	private Collection<Transaction> outstanding = new ArrayList<>();
 	private Integer outstanding_counter = 1;
 
-	// Add a scheduled executor for broadcasting every 10 seconds
 	private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+	/* atomic lock used by getOptimizedSyncBalance.
+	 * locked by us, and unlocked by the listener
+	 **/
 	private volatile boolean waitingForSync = false;
 
 	public Client(InetAddress serverAddress, String accountName, String replicaName) {
@@ -38,20 +39,19 @@ public class Client {
 		try {
 			connection = new SpreadConnection();
 			connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
-			debug("Connected to Spread server at: " + serverAddress);
+			debug("connected to Spread server at: " + serverAddress);
 
 			group = new SpreadGroup();
 			group.join(connection, accountName);
-			debug("Joined group: " + accountName);
+			debug("joined group: " + accountName);
 
 			this.listener = new Listener(this);
 			connection.add(listener);
 
-			// Start periodic broadcasting of transactions
+			// Start periodic broadcasting of transactions after 10 seconds
 			scheduler.scheduleAtFixedRate(this::broadcastOutstandingTransactions, 10, 10, TimeUnit.SECONDS);
 
 		} catch (SpreadException e) {
-			e.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -59,14 +59,20 @@ public class Client {
 		this(serverAddress, accountName, UUID.randomUUID().toString().substring(0, 6));
 	}
 
+	public Replica getReplica() {
+		return this.replica;
+	}
+
 	public void loadCommandsFromFile(String filename) {
 		debug("reading from " + filename);
-		try (Scanner scanner = new Scanner(new java.io.File(filename))) {
+
+		File f = new File(filename);
+
+		try (Scanner scanner = new Scanner(f)) {
 			while (scanner.hasNextLine()) {
 				this.parseInputLine(scanner.nextLine());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -83,12 +89,16 @@ public class Client {
 				this.parseInputLine(line);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
 
-	// Parsing and processing each line from the input file
+	/* line is a command line of the form "command arg1 arg2 ..." as
+	 * they are required by Transactions
+	 *
+     * we ignore empty lines and comment lines (starting with #)
+	 * we also ignore any arguments after a # in a line
+	 **/
 	private void parseInputLine(String line) {
 		if (line.isBlank()) return;
 		if (line.startsWith("#")) return;
@@ -102,10 +112,6 @@ public class Client {
 		this.processCommand(cmdName, args);
 	}
 
-	public Replica getReplica() {
-		return this.replica;
-	}
-
 	public void processCommand(String commandName, String[] args) {
 		switch (commandName.toLowerCase()) {
 			case "getsyncedbalance", "getsync" -> this.getSyncedBalance();
@@ -117,6 +123,11 @@ public class Client {
 				else System.err.println("Invalid sleep command.");
 			}
 			default -> {
+				/*
+				 * if the command is not a Client-specific command, we assume it's a transaction.
+				 * meaning we should
+				 * treat it as an outstanding transaction. this also means it should be replicated by other clients
+				 */
 				Transaction transaction = this.replica.makeTransaction(commandName, args, this.outstanding_counter);
 				if (transaction == null) return;
 				this.outstanding_counter++;
@@ -125,6 +136,11 @@ public class Client {
 		}
 	}
 
+	/*
+	 * Adds a transaction to the outstanding list. This means two things:
+	 	- we need to broadcast it to the group
+		- we need to eventually execute it
+	 **/
 	public void addPending(Transaction transaction) {
 		debug("added to outstanding: " + transaction);
 		outstanding.add(transaction);
@@ -150,16 +166,27 @@ public class Client {
 		}
 	}
 
+	/* special case for getSyncedBalance, which is not really a transaction, even if we treat it as one here.
+	 *
+	 * it's really a request for the current balance, after being synchronized. we need to make a "fake"
+	 * transaction and wait for it to return from the FIFO queue of our listener
+	 **/
 	public void requestSyncBalance() {
 		Transaction transaction = this.replica.makeTransaction("getSyncedBalance", new String[0], this.outstanding_counter);
 		this.outstanding_counter++;
 		this.addPending(transaction);
 	}
 
+	/* called by the listener to indicate that the sync balance has
+	 * been received, and that we're now ready to continue our main thread
+	 * pool, and can continue processing requests
+	 */
 	public void completeSync() {
 		this.waitingForSync = false;
 	}
 
+	// the good implementation.
+	// this will spin on our main thread until the listener unlocks our waitingForSync atomic lock
 	public synchronized BigDecimal getOptimizedSyncedBalance() {
 		waitingForSync = true;
 		this.requestSyncBalance();
@@ -174,6 +201,7 @@ public class Client {
 		return value;
 	}
 
+	// the dumb dumb implementation. falls into deadlocks, and we never see our thread actually complete
 	public BigDecimal getNaiveSyncedBalance() {
 
 		while (this.outstanding.size() != 0) {
@@ -191,6 +219,7 @@ public class Client {
 		return value;
 	}
 
+	// a wrapper for the two different implementations of getSyncedBalance
 	public BigDecimal getSyncedBalance() {
 		debug("getting synced balance");
 
@@ -203,18 +232,24 @@ public class Client {
 	}
 
 
-	// Display current group members
 	public void memberInfo() {
 		debug("memberInfo: " + group);
 		System.out.println(group);
 	}
 
-	// Broadcast all outstanding transactions
 	private void broadcastOutstandingTransactions() {
-		for (Transaction transaction : outstanding) {
+		for (Transaction transaction : this.outstanding) {
 			this.broadcastTransaction(transaction);
 		}
-		outstanding.clear();
+		
+		/*
+		 * it should be safe to clear all these tasks, as they
+		 * should be in the FIFO queue.
+		 
+		 * we haven't observed any concurrency issues with this, but it's possible that clearing
+		 * the list when the listener is processing new transactions could cause issues
+		 */
+		this.outstanding.clear();
 	}
 
 	// Broadcast a single transaction
@@ -241,6 +276,16 @@ public class Client {
 		debug("woke up from sleep");
 	}
 
+
+	/*
+	 * cleans up the client, reverting all our connectiosn to the spread server.
+	 
+	 this means we do a few things:
+	  - leave the spread group
+	  - tell the connection to remove the listener
+	  - disconnct ourselves
+	  - shut down the broadcast scheduler
+	**/
 	public void exit() {
 		debug("exiting...");
 		try {
@@ -276,14 +321,19 @@ public class Client {
 		System.err.println("Client[" + this.getReplica().getId() + "]: " + s);
 	}
 
+	/*
+	 * Runs a single client in interactive mode
+	 * 
+	 * Usage: java Client <server> <account>
+	 **/
 	public static void main(String[] args) throws UnknownHostException {
 		if (args.length != 2) {
 			System.out.println("Usage: java Client <server> <account>");
 			return;
 		}
 
-		String serverAddress = args[0];  // Server address
-		String accountName = args[1];    // Account name for the replica group
+		String serverAddress = args[0];
+		String accountName = args[1];
 
 		InetAddress address = InetAddress.getByName(serverAddress);
 
