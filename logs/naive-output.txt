@@ -1,0 +1,100 @@
+javac --target 21 -d target -cp target:ext/spread.jar --source-path src/main/java src/main/java/com/ass2/SimulateClients.java
+jar cfm bin/client.jar src/main/resources/MANIFEST.MF -C target .
+java -cp bin/client.jar:ext/spread.jar com.ass2.SimulateClients 127.0.0.1 group07 3 src/main/resources
+group07
+group07
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+group07
+0
+0
+0
+0
+0
+Client<Rep1> final balance: 0
+0
+Client<Rep2> final balance: 0
+0
+Client<Rep3> final balance: 0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+group07
+group07
+Transaction{cmd=getQuickBalance, id=Rep1 1}; Transaction{cmd=getQuickBalance, id=Rep2 1}; Transaction{cmd=getQuickBalance, id=Rep2 4}; Transaction{cmd=getQuickBalance, id=Rep1 4}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=getQuickBalance, id=Rep3 1}; Transaction{cmd=getQuickBalance, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep1 15}; Transaction{cmd=deposit 100, id=Rep1 16}; Transaction{cmd=deposit 100, id=Rep1 17}; Transaction{cmd=addInterest 20, id=Rep1 18}; Transaction{cmd=checkTxStatus Rep1 11, id=Rep1 19}
+Transaction{cmd=getQuickBalance, id=Rep1 1}; Transaction{cmd=getQuickBalance, id=Rep2 1}; Transaction{cmd=getQuickBalance, id=Rep2 4}; Transaction{cmd=getQuickBalance, id=Rep1 4}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=getQuickBalance, id=Rep3 1}; Transaction{cmd=getQuickBalance, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep2 15}; Transaction{cmd=deposit 120, id=Rep2 16}; Transaction{cmd=deposit 130, id=Rep2 17}; Transaction{cmd=addInterest 10, id=Rep2 18}; Transaction{cmd=checkTxStatus Rep2 11, id=Rep2 19}
+group07
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+Transaction{cmd=getQuickBalance, id=Rep3 12}; Transaction{cmd=getQuickBalance, id=Rep2 22}; Transaction{cmd=getQuickBalance, id=Rep1 22}; Transaction{cmd=getQuickBalance, id=Rep3 13}
+LISTENER: told to exit so returning
+0
+0
+0
+0
+Transaction{cmd=getQuickBalance, id=Rep3 12}; Transaction{cmd=getQuickBalance, id=Rep2 22}; Transaction{cmd=getQuickBalance, id=Rep1 22}; Transaction{cmd=getQuickBalance, id=Rep1 23}
+Transaction{cmd=getQuickBalance, id=Rep3 12}; Transaction{cmd=getQuickBalance, id=Rep2 22}; Transaction{cmd=getQuickBalance, id=Rep1 22}; Transaction{cmd=getQuickBalance, id=Rep2 23}
+LISTENER: told to exit so returning
+LISTENER: told to exit so returning
