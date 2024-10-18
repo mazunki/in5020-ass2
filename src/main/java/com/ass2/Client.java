@@ -225,8 +225,8 @@ public class Client {
 		debug("getting synced balance");
 
 		BigDecimal value;
-		value = this.getNaiveSyncedBalance();
-		// value = this.getOptimizedSyncedBalance();
+		// value = this.getNaiveSyncedBalance();
+		value = this.getOptimizedSyncedBalance();
 
 		System.out.println(value);
 		return value;
