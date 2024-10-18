@@ -14,121 +14,164 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Client {
-    private SpreadConnection connection;
-    private Replica replica;
-    private SpreadGroup group;
-    Listener listener;
+	private SpreadConnection connection;
+	private Replica replica;
+	private SpreadGroup group;
+	Listener listener;
 
-    // Add this collection to store the outstanding transactions
-    private Collection<Transaction> outstanding = new ArrayList<>();
+	// Add this collection to store the outstanding transactions
+	private Collection<Transaction> outstanding = new ArrayList<>();
 	private Integer outstanding_counter = 1;
 
-    // Add a scheduled executor for broadcasting every 10 seconds
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	// Add a scheduled executor for broadcasting every 10 seconds
+	private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public Client(InetAddress serverAddress, String accountName, String replicaName) {
-        this.replica = new Replica(accountName, replicaName);
-        try {
-            connection = new SpreadConnection();
-            connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
-            debug("Connected to Spread server at: " + serverAddress);
+	private volatile boolean waitingForSync = false;
 
-            group = new SpreadGroup();
-            group.join(connection, accountName);
-            debug("Joined group: " + accountName);
+	public Client(InetAddress serverAddress, String accountName, String replicaName) {
+		this.replica = new Replica(accountName, replicaName);
+		try {
+			connection = new SpreadConnection();
+			connection.connect(serverAddress, 4803, this.replica.getId(), false, true);
+			debug("Connected to Spread server at: " + serverAddress);
 
-            this.listener = new Listener(this);
-            connection.add(listener);
+			group = new SpreadGroup();
+			group.join(connection, accountName);
+			debug("Joined group: " + accountName);
 
-            // Start periodic broadcasting of transactions
-            scheduler.scheduleAtFixedRate(this::broadcastOutstandingTransactions, 0, 10, TimeUnit.SECONDS);
+			this.listener = new Listener(this);
+			connection.add(listener);
 
-        } catch (SpreadException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+			// Start periodic broadcasting of transactions
+			scheduler.scheduleAtFixedRate(this::broadcastOutstandingTransactions, 10, 10, TimeUnit.SECONDS);
+
+		} catch (SpreadException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
-    public Client(InetAddress serverAddress, String accountName) {
-        this(serverAddress, accountName, UUID.randomUUID().toString().substring(0, 6));
-    }
+	public Client(InetAddress serverAddress, String accountName) {
+		this(serverAddress, accountName, UUID.randomUUID().toString().substring(0, 6));
+	}
 
-    // Method to load commands from a file
-    public void loadCommandsFromFile(String filename) {
+	public void loadCommandsFromFile(String filename) {
 		debug("reading from " + filename);
-        try (Scanner scanner = new Scanner(new java.io.File(filename))) {
-            while (scanner.hasNextLine()) {
-                this.parseInputLine(scanner.nextLine());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try (Scanner scanner = new Scanner(new java.io.File(filename))) {
+			while (scanner.hasNextLine()) {
+				this.parseInputLine(scanner.nextLine());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    // Parsing and processing each line from the input file
-    private void parseInputLine(String line) {
-        String[] parts = line.split(" ");
-        String cmdName = parts[0];
-        String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+	public void loadCommandsFromInteractive() {
+		System.out.println("replicated system. please enter your commands (type 'exit' to quit):");
 
-        this.processCommand(cmdName, args);
-    }
+		try (Scanner scanner = new Scanner(System.in)) {
+			while (true) {
+				System.out.print("> ");
+				String line = scanner.nextLine();
+				if (line.equalsIgnoreCase("exit")) {
+					break;
+				}
+				this.parseInputLine(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	// Parsing and processing each line from the input file
+	private void parseInputLine(String line) {
+		if (line.isBlank()) return;
+		if (line.startsWith("#")) return;
+
+		String[] contents = line.split("#");
+		String[] parts = contents[0].trim().split(" ");
+
+		String cmdName = parts[0];
+		String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+
+		this.processCommand(cmdName, args);
+	}
 
 	public Replica getReplica() {
 		return this.replica;
 	}
 
-    // Processes a command by determining if it's handled locally or needs to be broadcast
-    public void processCommand(String commandName, String[] args) {
-
-
-        switch (commandName) {
-            case "getSyncedBalance" -> this.getSyncedBalance();
-            case "memberInfo" -> this.memberInfo();
-            case "exit" -> this.exit();
-			case "getHistory" -> this.getHistory();
-            case "sleep" -> {
-                if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
-                else System.out.println("Invalid sleep command.");
-            }
-            default -> {
-                // For commands like deposit or addInterest, we need to create a transaction
-                Transaction transaction = new Transaction(commandName + " " + String.join(" ", args), this.replica.getId() + " "  + this.outstanding_counter);
+	public void processCommand(String commandName, String[] args) {
+		switch (commandName.toLowerCase()) {
+			case "getsyncedbalance", "getsync" -> this.getSyncedBalance();
+			case "memberinfo", "members" -> this.memberInfo();
+			case "exit", "quit" -> this.exit();
+			case "gethistory", "history" -> this.getHistory();
+			case "sleep" -> {
+				if (args.length == 1) this.sleep(Integer.parseInt(args[0]));
+				else System.out.println("Invalid sleep command.");
+			}
+			default -> {
+				Transaction transaction = this.replica.makeTransaction(commandName, args, this.outstanding_counter);
+				if (transaction == null) return;
 				this.outstanding_counter++;
-                this.addPending(transaction); // Add to outstanding collection instead of immediate broadcast
-            }
-        }
-    }
-
-    public void addPending(Transaction transaction) {
-        debug("Added to pending: " + transaction);
-        outstanding.add(transaction);
-    }
-
-    public void getHistory() {
-		StringJoiner sj = new StringJoiner("; ");
-        for (Transaction entry : this.replica.getExecutedTransactions()) {
-            sj.add(entry.toString());
-        }
-        for (Transaction entry : this.outstanding) {
-            sj.add(entry.toString());
-        }
-        debug("transaction history: " + sj);
-		System.out.println(sj);
-    }
-
-	public BigDecimal getOptimizedSyncedBalance() {
-		// TODO: fix this shit
-		return this.getNaiveSyncedBalance();
+				this.addPending(transaction);
+			}
+		}
 	}
 
-    public BigDecimal getNaiveSyncedBalance() {
-		debug("syncing balance");
+	public void addPending(Transaction transaction) {
+		debug("added to outstanding: " + transaction);
+		outstanding.add(transaction);
+	}
+
+	public void getHistory() {
+		StringJoiner sj = new StringJoiner("; ");
+		for (Transaction entry : this.replica.getExecutedTransactions()) {
+			sj.add(entry.toString());
+		}
+		for (Transaction entry : this.outstanding) {
+			sj.add(entry.toString());
+		}
+		debug("transaction history: " + sj);
+		System.out.println(sj);
+	}
+
+	public void broadcastExecutedTransactions() {
+		for (Transaction transaction : this.replica.getExecutedTransactions()) {
+			this.broadcastTransaction(transaction);
+		}
+	}
+
+	public void requestSyncBalance() {
+		Transaction transaction = this.replica.makeTransaction("getSyncedBalance", new String[0], this.outstanding_counter);
+		this.outstanding_counter++;
+		this.addPending(transaction);
+		
+	}
+
+	public void completeSync() {
+		this.waitingForSync = false;
+	}
+
+	public synchronized BigDecimal getOptimizedSyncedBalance() {
+		waitingForSync = true;
+		this.requestSyncBalance();
+
+		while (waitingForSync) { }
+
+		BigDecimal value = this.replica.getQuickBalance();
+		waitingForSync = false;
+		debug("optimizedSyncedBalance: " + value);
+		return value;
+	}
+
+	public BigDecimal getNaiveSyncedBalance() {
 
 		while (this.outstanding.size() != 0) {
 			Thread.yield();
@@ -143,71 +186,84 @@ public class Client {
 		debug("naiveSyncedBalance: " + value);
 
 		return value;
-    }
+	}
 
-	public BigDecimal getSyncedBalance() {
-		BigDecimal value = this.getNaiveSyncedBalance();
+	public synchronized BigDecimal getSyncedBalance() {
+		debug("getting synced balance");
+
+		BigDecimal value;
+		// value = this.getNaiveSyncedBalance();
+		value = this.getOptimizedSyncedBalance();
+
 		System.out.println(value);
 		return value;
 	}
 
 
-    // Display current group members
-    public void memberInfo() {
+	// Display current group members
+	public void memberInfo() {
 		debug("memberInfo: " + group);
-        System.out.println(group);
-    }
+		System.out.println(group);
+	}
 
-    // Broadcast all outstanding transactions
-    private void broadcastOutstandingTransactions() {
-        for (Transaction transaction : outstanding) {
-            this.broadcastTransaction(transaction);
-        }
-        outstanding.clear();  // Clear the collection after broadcasting
-    }
-
-    // Broadcast a single transaction
-    public void broadcastTransaction(Transaction transaction) {
-        SpreadMessage message = new SpreadMessage();
-        message.setFifo();  // Ensure FIFO ordering of messages
-        message.addGroup(group);  // Send to all members in the group
-
-        try {
-            message.setObject(transaction);  // Serialize the transaction into the message
-            connection.multicast(message);  // Send the message to the group
-            debug("broadcasted transaction: " + transaction);
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sleep(int duration) {
-        debug("sleeping for " + duration + "s");
-        try {
-            Thread.sleep(duration * 1000L);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        debug("woke up from sleep");
-    }
-
-    public void exit() {
-		debug("exiting...");
-        try {
-            group.leave();
-            this.connection.remove(this.listener);
-            connection.disconnect();
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
-		this.scheduler.shutdown();
-        try {
-			this.scheduler.awaitTermination(15, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			System.err.println(this + ": Couldn't properly send all outstanding transactions");
+	// Broadcast all outstanding transactions
+	private void broadcastOutstandingTransactions() {
+		for (Transaction transaction : outstanding) {
+			this.broadcastTransaction(transaction);
 		}
+		outstanding.clear();
+	}
+
+	// Broadcast a single transaction
+	public void broadcastTransaction(Transaction transaction) {
+		SpreadMessage message = new SpreadMessage();
+		message.setFifo();
+		message.addGroup(group);
+
+		try {
+			message.setObject(transaction);
+			connection.multicast(message);
+			debug("broadcasted transaction: " + transaction);
+		} catch (SpreadException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sleep(int duration) {
+		debug("sleeping for " + duration + "s");
+		try {
+			Thread.sleep(duration * 1000L);
+		} catch (InterruptedException e) {
+		}
+		debug("woke up from sleep");
+	}
+
+	public void exit() {
+		debug("exiting...");
+		try {
+			group.leave();
+			this.connection.remove(this.listener);
+			connection.disconnect();
+		} catch (SpreadException e) {
+			e.printStackTrace();
+		}
+		this.scheduler.shutdown();
+
+		try {
+			if (!this.scheduler.awaitTermination(15, TimeUnit.SECONDS)) {
+				scheduler.shutdownNow(); // Force shutdown after waiting period
+				if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+					debug("scheduler did not terminate properly.");
+				}
+			}
+		} catch (InterruptedException e) {
+			debug("couldn't properly send all outstanding transactions");
+			scheduler.shutdownNow();
+		}
+		this.scheduler.shutdownNow();
+
 		debug("we gone");
-    }
+	}
 
 	public String toString() {
 		return "Client<" + this.replica.getId() + ">";
@@ -216,6 +272,27 @@ public class Client {
 	public void debug(String s) {
 		System.err.println("Client[" + this.getReplica().getId() + "]: " + s);
 	}
+
+	public static void main(String[] args) throws UnknownHostException {
+		if (args.length != 2) {
+			System.out.println("Usage: java Client <server> <account>");
+			return;
+		}
+
+		String serverAddress = args[0];  // Server address
+		String accountName = args[1];    // Account name for the replica group
+
+		InetAddress address = InetAddress.getByName(serverAddress);
+
+		Client client = new Client(address, accountName);
+
+		// Run interactive mode
+		client.loadCommandsFromInteractive();
+
+		// Print final balance after interactive mode ends
+		System.out.println("Final balance: " + client.getReplica().getQuickBalance());
+	}
+
 
 }
 

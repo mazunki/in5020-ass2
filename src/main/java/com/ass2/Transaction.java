@@ -16,6 +16,10 @@ public class Transaction implements Serializable {
         return id;
     }
 
+    public String getReplicaId() {
+        return this.id.split(" ")[0];
+    }
+
     public String getCommand() {
         return command;
     }
@@ -30,7 +34,15 @@ public class Transaction implements Serializable {
         return parts.length > 1 ? parts[1].split(" ") : new String[0];
     }
 
-	public void process(Replica replica) {
+	public void process(Client client) {
+		Replica replica = client.getReplica();
+
+		if (this.commandName().equals("getSyncedBalance")) {
+			if (this.getReplicaId().equals(replica.getId())) {
+				client.completeSync();
+				return;
+			}
+		}
 		replica.processTransaction(this);
 	}
 

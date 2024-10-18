@@ -6,8 +6,9 @@ BINDIR = bin
 LOGDIR = log
 
 JAVA_TARGET = 21
-MAIN_CLASS = com.ass2.SimulateClients
-SPREAD_CONF = $(RESOURCES)/spread.conf
+CLIENT_MAIN_CLASS = com.ass2.Client
+SIMULATE_MAIN_CLASS = com.ass2.SimulateClients
+REPLICA_MAIN_CLASS = com.ass2.Replica
 
 CLIENT_JAR = $(BINDIR)/client.jar
 
@@ -51,21 +52,21 @@ purge: clean
 $(CLIENT_JAR): classfiles | $(BINDIR)
 	jar cfm $(CLIENT_JAR) $(RESOURCES)/MANIFEST.MF -C $(CLASSPATH) .
 
-# Run interactive mode
-run_interactive: $(CLIENT_JAR)
-	java -cp $(CLIENT_JAR):$(DEPS) com.ass2.Client $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS)
-
-# Run simulation with SimulateClients class
+# Run simulation using SimulateClients
 run_simulation: $(CLIENT_JAR)
-	java -cp $(CLIENT_JAR):$(DEPS) $(MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) $(COMMANDS_PATH)
+	java -cp $(CLIENT_JAR):$(DEPS) $(SIMULATE_MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) $(COMMANDS_PATH)
 
-# Run single replica simulation
+# Run a single client in interactive mode
+run_client: $(CLIENT_JAR)
+	java -cp $(CLIENT_JAR):$(DEPS) $(CLIENT_MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME)
+
+# Run single replica (non-replicated instance)
 run_single_replica: $(CLIENT_JAR)
-	java -cp $(CLIENT_JAR):$(DEPS) com.ass2.Client $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) 1 $(COMMANDS_PATH)/commands1.txt
+	java -cp $(CLIENT_JAR):$(DEPS) $(REPLICA_MAIN_CLASS) $(ACCOUNT_NAME)
 
 # Build all
 all: classfiles $(CLIENT_JAR)
 
-.PHONY: all clean purge run_interactive run_simulation run_single_replica
+.PHONY: all clean purge run_simulation run_client run_single_replica
 .DEFAULT_GOAL := classfiles
 

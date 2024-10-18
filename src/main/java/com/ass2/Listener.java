@@ -17,7 +17,9 @@ public class Listener implements AdvancedMessageListener {
 	public void regularMessageReceived(SpreadMessage message) {
 		try {
 			if (message.getObject() instanceof Transaction transaction) {
-				transaction.process(this.client.getReplica());
+				if (!this.client.getReplica().checkTxStatusImpl(transaction.getId())) {
+					transaction.process(this.client);
+				}
 			}
 		} catch (SpreadException e) {
 			throw new RuntimeException(e);
@@ -26,8 +28,13 @@ public class Listener implements AdvancedMessageListener {
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage spreadMessage) {
-		System.out.println(Arrays.toString(spreadMessage.getMembershipInfo().getMembers()));
-		//TODO: Handle new clients
+
+		if (spreadMessage.getMembershipInfo().isCausedByJoin()) {
+			this.client.debug("member joined!");
+			this.client.broadcastExecutedTransactions();
+		} else if (spreadMessage.getMembershipInfo().isCausedByLeave()) {
+			this.client.debug("member leaved!");
+		}
 	}
 }
 

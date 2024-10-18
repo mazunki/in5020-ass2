@@ -1,39 +1,37 @@
+# prepare
 memberInfo
 getSyncedBalance
 getQuickBalance
-deposit 100
-checkTxStatus Rep1 0
-getSyncedBalance
-getQuickBalance
-deposit 100
-getQuickBalance
-sleep 6
-getSyncedBalance
-addInterest 10
-getSyncedBalance
-deposit 100
-deposit 50
-deposit 40
-deposit 30
-deposit 20
-deposit 10
-addInterest 10
-sleep 7
-getSyncedBalance
-getQuickBalance
+
 deposit 100
 deposit 100
-addInterest 20
-checkTxStatus Rep1 11
-memberInfo
-getHistory
+getQuickBalance  # 200
+
+sleep 4
+
+deposit 100
+deposit 100
+deposit 100
+getQuickBalance  # 500
+
+sleep 4
+
+deposit 100
+getQuickBalance  # 600
+
+sleep 4  # 12 seconds == second round
+
+getQuickBalance  # 6xx
+deposit 100
+getQuickBalance  # 700
+getSyncedBalance # 6yy
+
 cleanHistory
 deposit 100
-sleep 8
-getSyncedBalance
-getQuickBalance
-sleep 30
+
+# bye bye
 getSyncedBalance
 getQuickBalance
 getHistory
 exit
+

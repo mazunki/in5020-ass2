@@ -2,7 +2,9 @@ package com.ass2;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Replica {
     private final Account account;
@@ -10,6 +12,7 @@ public class Replica {
 
     // List to store executed transactions
     private final List<Transaction> executed = new ArrayList<>();
+	private int order_counter = 0;
 
     public Replica(String accountName, String replicaName) {
         this.account = new Account(accountName);
@@ -25,44 +28,75 @@ public class Replica {
         String[] args = transaction.commandArgs();
         String cmd = transaction.commandName();
 
-        switch (cmd) {
-            case "deposit" -> {
+        switch (cmd.toLowerCase()) {
+            case "deposit", "add" -> {
                 if (args.length == 1) {
                     deposit(new BigDecimal(args[0]));
-                    executed.add(transaction);  // Log transaction in executed list
+                    executed.add(transaction);
+					order_counter++;
                 } else {
-                    System.out.println("Invalid deposit command.");
+                    System.err.println("Invalid deposit command.");
                 }
             }
-            case "addInterest" -> {
+            case "addinterest", "interest" -> {
                 if (args.length == 1) {
                     addInterest(Integer.parseInt(args[0]));
-                    executed.add(transaction);  // Log transaction in executed list
+                    executed.add(transaction);
+					order_counter++;
                 } else {
-                    System.out.println("Invalid interest command.");
+                    System.err.println("Invalid interest command.");
                 }
             }
-            case "checkTxStatus" -> checkTxStatus(args);
-            case "getQuickBalance" -> getQuickBalance();
-            case "cleanHistory" -> cleanHistory();
-            default -> System.err.println("Unknown command.");
+            case "getquickbalance", "balance" -> {
+				getQuickBalance();
+				executed.add(transaction);
+				order_counter++;
+			}
+            case "getsyncedbalance" -> getQuickBalance();
+            case "checktxstatus", "check" -> checkTxStatus(transaction.getId());
+            case "cleanhistory", "clearHistory" -> cleanHistory();
+            default -> System.err.println("unknown command: " + cmd);
         }
     }
 
-	public boolean checkTxStatus(String[] transactionUniqueId) {
-		String txId = String.join(" ", transactionUniqueId);
+	public Transaction makeTransaction(String commandName, String[] args, int counter) {
+		String cmd;
+		String commandArgs = String.join(" ", args);
 
+        switch (commandName.toLowerCase()) {
+            case "deposit", "add" -> cmd = "deposit";
+            case "addinterest", "interest" -> cmd = "addInterest";
+            case "checktxstatus", "check" -> cmd = "checkTxStatus";
+            case "getquickbalance", "balance" -> cmd = "getQuickBalance";
+            case "getsyncedbalance" -> cmd = "getSyncedBalance";
+            case "cleanhistory", "clearHistory" -> cmd = "cleanHistory";
+            default -> {
+				System.err.println("no such replica command: " + commandName);
+				return null;
+			}
+        }
+
+		if (commandArgs.length() > 0) {
+			cmd = cmd + " " + commandArgs;
+		}
+
+		return new Transaction(cmd, this.getId() + " "  + counter);
+	}
+
+	public boolean checkTxStatusImpl(String transactionUniqueId) {
 		boolean found = false;
 		for (Transaction t : this.executed) {
-			if (t.getId().equals(txId)) {
+			if (t.getId().equals(transactionUniqueId)) {
 				found = true;
 				break;
 			}
 		}
+		return found;
+	}
 
-		debug(transactionUniqueId + " was found: " + found);
-		System.out.println(found);
-
+	public boolean checkTxStatus(String transactionUniqueId) {
+		boolean found = this.checkTxStatusImpl(transactionUniqueId);
+		debug("checking for " + transactionUniqueId);
 		return found;
 	}
 
@@ -72,7 +106,7 @@ public class Replica {
     }
 
     public void addInterest(int percent) {
-		debug("depositing " + percent + "%");
+		debug("adding interest " + percent + "%");
         account.addInterest(percent);
     }
 
@@ -95,5 +129,40 @@ public class Replica {
     public List<Transaction> getExecutedTransactions() {
         return executed;
     }
+
+	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out.println("Usage: java Replica <accountName>");
+			return;
+		}
+
+		String accountName = args[0];  // Account name for the replica group
+
+		Replica replica = new Replica(accountName, "standalone");
+
+		// Interactive mode for a non-replicated instance
+		System.out.println("Single non-replicated instance. Enter your commands (type 'exit' to quit):");
+		try (Scanner scanner = new Scanner(System.in)) {
+			while (true) {
+				System.out.print("> ");
+				String line = scanner.nextLine();
+				if (line.equalsIgnoreCase("exit")) {
+					break;
+				}
+
+				// Parse and process the command
+				String[] parts = line.split(" ");
+				String command = parts[0];
+				String[] argsArray = Arrays.copyOfRange(parts, 1, parts.length);
+
+				Transaction transaction = new Transaction(command + " " + String.join(" ", argsArray), "1");
+				replica.processTransaction(transaction);
+			}
+		}
+
+		// Print final balance
+		replica.getQuickBalance();
+	}
+
 }
 

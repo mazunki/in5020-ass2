@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SimulateClients {
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) throws UnknownHostException, InterruptedException {
         if (args.length != 4) {
             System.out.println("Usage: java SimulateClients <server> <account> <no_replicas> <pathToCommands>");
             return;
@@ -16,8 +16,8 @@ public class SimulateClients {
 
         String serverAddress = args[0];  // Server address
         String accountName = args[1];    // Account name for the replica group
-        int noOfReplicas = Integer.parseInt(args[2]);  // Number of replicas
-        String pathToCommands = args[3];  // Path to the command files
+        int noOfReplicas = Integer.parseInt(args[2]);
+        String pathToCommands = args[3];
 
         InetAddress address = InetAddress.getByName(serverAddress);
         Client[] clients = new Client[noOfReplicas];
@@ -26,7 +26,20 @@ public class SimulateClients {
         ExecutorService executorService = Executors.newFixedThreadPool(noOfReplicas);
 
         // Submit each client to the thread pool with their respective commands file
-        for (int i = 0; i < noOfReplicas; i++) {
+        for (int i = 0; i < 2; i++) {
+            final int index = i;
+			System.out.println("building new");
+            executorService.submit(() -> {
+                String commandFile = pathToCommands + (index + 1) + ".txt";
+                clients[index] = new Client(address, accountName, "Rep" + (index + 1));
+                clients[index].loadCommandsFromFile(commandFile);
+            });
+        }
+
+		Thread.sleep(15*1000);
+		System.out.println("next!");
+
+        for (int i = 2; i < noOfReplicas; i++) {
             final int index = i;
             executorService.submit(() -> {
                 String commandFile = pathToCommands + (index + 1) + ".txt";
@@ -35,16 +48,20 @@ public class SimulateClients {
             });
         }
 
-        // Graceful shutdown of the ExecutorService
+
         executorService.shutdown();
         try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+				executorService.shutdownNow();
+			}
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+		System.out.println("are we here");
+
         for (Client client : clients) {
-            System.out.println(client.toString() + " final balance: " + client.getSyncedBalance());
+            System.out.println(client.toString() + " final balance: " + client.getReplica().getQuickBalance());
         }
     }
 }
