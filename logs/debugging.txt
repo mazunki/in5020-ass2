@@ -1,0 +1,471 @@
+Client[Rep2]: Connected to Spread server at: /127.0.0.1
+Client[Rep1]: Connected to Spread server at: /127.0.0.1
+Client[Rep1]: Joined group: group07
+Client[Rep2]: Joined group: group07
+Client[Rep1]: reading from src/main/resources/Rep1.txt
+Client[Rep2]: reading from src/main/resources/Rep2.txt
+Client[Rep2]: member joined!
+Client[Rep1]: member joined!
+Client[Rep1]: member joined!
+Client[Rep2]: memberInfo: group07
+Client[Rep1]: memberInfo: group07
+Client[Rep2]: getting synced balance
+Client[Rep1]: getting synced balance
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 1}
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 1}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 1}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 1}
+Replica[Rep1]: quickBalance: 0
+Replica[Rep2]: quickBalance: 0
+Replica[Rep1]: quickBalance: 0
+Client[Rep1]: optimizedSyncedBalance: 0
+Replica[Rep2]: quickBalance: 0
+Client[Rep2]: optimizedSyncedBalance: 0
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 2}
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 2}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 3}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 70, id=Rep2 3}
+Client[Rep1]: added to outstanding: Transaction{cmd=checkTxStatus Rep1 0, id=Rep1 4}
+Client[Rep2]: added to outstanding: Transaction{cmd=checkTxStatus Rep2 0, id=Rep2 4}
+Client[Rep1]: getting synced balance
+Client[Rep2]: getting synced balance
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 5}
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 5}
+Client[Rep3]: Connected to Spread server at: /127.0.0.1
+Client[Rep3]: Joined group: group07
+Client[Rep1]: member joined!
+Client[Rep2]: member joined!
+Client[Rep3]: reading from src/main/resources/Rep3.txt
+Client[Rep3]: member joined!
+Client[Rep3]: memberInfo: group07
+Client[Rep3]: getting synced balance
+Client[Rep3]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep3 1}
+Replica[Rep1]: quickBalance: 0
+Replica[Rep2]: quickBalance: 0
+Replica[Rep3]: quickBalance: 0
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep1 2}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep2 2}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 3}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 70, id=Rep2 3}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=checkTxStatus Rep1 0, id=Rep1 4}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=checkTxStatus Rep2 0, id=Rep2 4}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 5}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 5}
+Replica[Rep3]: quickBalance: 0
+Replica[Rep2]: quickBalance: 0
+Replica[Rep1]: quickBalance: 0
+Replica[Rep3]: quickBalance: 0
+Replica[Rep2]: quickBalance: 0
+Replica[Rep1]: quickBalance: 0
+Replica[Rep2]: depositing 70
+Replica[Rep1]: depositing 70
+Replica[Rep3]: depositing 70
+Replica[Rep2]: depositing 100
+Replica[Rep1]: depositing 100
+Replica[Rep3]: depositing 100
+Replica[Rep2]: checking for Rep2 4
+Replica[Rep1]: checking for Rep2 4
+Replica[Rep3]: checking for Rep2 4
+Replica[Rep2]: checking for Rep1 4
+Replica[Rep1]: checking for Rep1 4
+Replica[Rep3]: checking for Rep1 4
+Replica[Rep1]: quickBalance: 170
+Replica[Rep3]: quickBalance: 170
+Replica[Rep2]: quickBalance: 170
+Replica[Rep2]: quickBalance: 170
+Replica[Rep1]: quickBalance: 170
+Replica[Rep3]: quickBalance: 170
+Client[Rep2]: optimizedSyncedBalance: 170
+Client[Rep1]: optimizedSyncedBalance: 170
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 6}
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 6}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 7}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 130, id=Rep2 7}
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 8}
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 8}
+Client[Rep1]: sleeping for 6s
+Client[Rep2]: sleeping for 5s
+Client[Rep2]: woke up from sleep
+Client[Rep1]: woke up from sleep
+Client[Rep2]: getting synced balance
+Client[Rep1]: getting synced balance
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 9}
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 9}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep3 1}
+Replica[Rep1]: quickBalance: 170
+Replica[Rep2]: quickBalance: 170
+Replica[Rep3]: quickBalance: 170
+Client[Rep3]: optimizedSyncedBalance: 170
+Client[Rep3]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep3 2}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit 50, id=Rep3 3}
+Client[Rep3]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep3 4}
+Client[Rep3]: sleeping for 10s
+Client[Rep3]: woke up from sleep
+Client[Rep3]: getting synced balance
+Client[Rep3]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep3 5}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep2 6}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep1 6}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 130, id=Rep2 7}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 7}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep2 8}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep1 8}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 9}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 9}
+Replica[Rep3]: quickBalance: 170
+Replica[Rep1]: quickBalance: 170
+Replica[Rep2]: quickBalance: 170
+Replica[Rep1]: depositing 100
+Replica[Rep3]: depositing 100
+Replica[Rep2]: depositing 100
+Replica[Rep1]: quickBalance: 270
+Replica[Rep3]: quickBalance: 270
+Replica[Rep2]: quickBalance: 270
+Replica[Rep1]: quickBalance: 270
+Replica[Rep3]: quickBalance: 270
+Replica[Rep2]: quickBalance: 270
+Replica[Rep1]: depositing 130
+Replica[Rep3]: depositing 130
+Replica[Rep2]: depositing 130
+Replica[Rep1]: quickBalance: 400
+Client[Rep1]: optimizedSyncedBalance: 400
+Replica[Rep3]: quickBalance: 400
+Replica[Rep1]: quickBalance: 400
+Replica[Rep2]: quickBalance: 400
+Client[Rep1]: added to outstanding: Transaction{cmd=addInterest 10, id=Rep1 10}
+Replica[Rep2]: quickBalance: 400
+Replica[Rep3]: quickBalance: 400
+Replica[Rep1]: quickBalance: 400
+Client[Rep1]: getting synced balance
+Replica[Rep2]: quickBalance: 400
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 11}
+Client[Rep2]: optimizedSyncedBalance: 400
+Replica[Rep3]: quickBalance: 400
+Client[Rep2]: added to outstanding: Transaction{cmd=addInterest 5, id=Rep2 10}
+Client[Rep2]: getting synced balance
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 11}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep3 2}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit 50, id=Rep3 3}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep3 4}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep3 5}
+Replica[Rep3]: quickBalance: 400
+Replica[Rep1]: quickBalance: 400
+Replica[Rep2]: quickBalance: 400
+Replica[Rep3]: depositing 50
+Replica[Rep2]: depositing 50
+Replica[Rep1]: depositing 50
+Replica[Rep3]: quickBalance: 450
+Replica[Rep2]: quickBalance: 450
+Replica[Rep3]: quickBalance: 450
+Replica[Rep1]: quickBalance: 450
+Client[Rep3]: optimizedSyncedBalance: 450
+Replica[Rep2]: quickBalance: 450
+Client[Rep3]: added to outstanding: Transaction{cmd=addInterest 30, id=Rep3 6}
+Replica[Rep1]: quickBalance: 450
+Client[Rep3]: getting synced balance
+Client[Rep3]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep3 7}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=addInterest 5, id=Rep2 10}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=addInterest 10, id=Rep1 10}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 11}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 11}
+Replica[Rep3]: adding interest 10%
+Replica[Rep1]: adding interest 10%
+Replica[Rep2]: adding interest 10%
+Replica[Rep3]: adding interest 5%
+Replica[Rep2]: adding interest 5%
+Replica[Rep1]: adding interest 5%
+Replica[Rep3]: quickBalance: 519.75
+Replica[Rep1]: quickBalance: 519.75
+Replica[Rep2]: quickBalance: 519.75
+Client[Rep1]: optimizedSyncedBalance: 519.75
+Replica[Rep1]: quickBalance: 519.75
+Replica[Rep3]: quickBalance: 519.75
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 12}
+Replica[Rep2]: quickBalance: 519.75
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 50, id=Rep1 13}
+Client[Rep2]: optimizedSyncedBalance: 519.75
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 40, id=Rep1 14}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 30, id=Rep1 15}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 110, id=Rep2 12}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 20, id=Rep1 16}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 40, id=Rep2 13}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 10, id=Rep1 17}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 50, id=Rep2 14}
+Client[Rep1]: added to outstanding: Transaction{cmd=addInterest 10, id=Rep1 18}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 20, id=Rep2 15}
+Client[Rep1]: sleeping for 7s
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 30, id=Rep2 16}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 100, id=Rep2 17}
+Client[Rep2]: added to outstanding: Transaction{cmd=addInterest 3, id=Rep2 18}
+Client[Rep2]: sleeping for 6s
+Client[Rep3]: broadcasted transaction: Transaction{cmd=addInterest 30, id=Rep3 6}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep3 7}
+Replica[Rep1]: adding interest 30%
+Replica[Rep3]: adding interest 30%
+Replica[Rep2]: adding interest 30%
+Replica[Rep1]: quickBalance: 675.675
+Replica[Rep3]: quickBalance: 675.675
+Client[Rep3]: optimizedSyncedBalance: 675.675
+Replica[Rep2]: quickBalance: 675.675
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit 200, id=Rep3 8}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit -100, id=Rep3 9}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit 10, id=Rep3 10}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit 30, id=Rep3 11}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit -100, id=Rep3 12}
+Client[Rep3]: added to outstanding: Transaction{cmd=deposit 50, id=Rep3 13}
+Client[Rep3]: added to outstanding: Transaction{cmd=addInterest 20, id=Rep3 14}
+Client[Rep3]: sleeping for 9s
+Client[Rep2]: woke up from sleep
+Client[Rep2]: getting synced balance
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 19}
+Client[Rep1]: woke up from sleep
+Client[Rep1]: getting synced balance
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 19}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 110, id=Rep2 12}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 12}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 40, id=Rep2 13}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 50, id=Rep1 13}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 50, id=Rep2 14}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 20, id=Rep2 15}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 40, id=Rep1 14}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 30, id=Rep2 16}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep2 17}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 30, id=Rep1 15}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=addInterest 3, id=Rep2 18}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 20, id=Rep1 16}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 19}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 10, id=Rep1 17}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=addInterest 10, id=Rep1 18}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 19}
+Replica[Rep1]: depositing 110
+Replica[Rep3]: depositing 110
+Replica[Rep2]: depositing 110
+Replica[Rep1]: depositing 40
+Replica[Rep2]: depositing 40
+Replica[Rep3]: depositing 40
+Replica[Rep1]: depositing 100
+Replica[Rep3]: depositing 100
+Replica[Rep2]: depositing 100
+Replica[Rep1]: depositing 50
+Replica[Rep3]: depositing 50
+Replica[Rep2]: depositing 50
+Replica[Rep1]: depositing 50
+Replica[Rep3]: depositing 50
+Replica[Rep2]: depositing 50
+Replica[Rep1]: depositing 20
+Replica[Rep2]: depositing 20
+Replica[Rep3]: depositing 20
+Replica[Rep1]: depositing 40
+Replica[Rep2]: depositing 40
+Replica[Rep1]: depositing 30
+Replica[Rep3]: depositing 40
+Replica[Rep1]: depositing 30
+Replica[Rep2]: depositing 30
+Replica[Rep1]: depositing 100
+Replica[Rep3]: depositing 30
+Replica[Rep2]: depositing 30
+Replica[Rep1]: depositing 20
+Replica[Rep2]: depositing 100
+Replica[Rep3]: depositing 30
+Replica[Rep1]: adding interest 3%
+Replica[Rep2]: depositing 20
+Replica[Rep1]: depositing 10
+Replica[Rep3]: depositing 100
+Replica[Rep2]: adding interest 3%
+Replica[Rep1]: quickBalance: 1313.64525
+Replica[Rep3]: depositing 20
+Replica[Rep2]: depositing 10
+Replica[Rep1]: adding interest 10%
+Replica[Rep2]: quickBalance: 1313.64525
+Replica[Rep3]: adding interest 3%
+Replica[Rep2]: adding interest 10%
+Client[Rep2]: optimizedSyncedBalance: 1313.64525
+Replica[Rep3]: depositing 10
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 20}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 120, id=Rep2 21}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 130, id=Rep2 22}
+Replica[Rep3]: quickBalance: 1313.64525
+Client[Rep2]: added to outstanding: Transaction{cmd=addInterest 10, id=Rep2 23}
+Client[Rep2]: added to outstanding: Transaction{cmd=checkTxStatus Rep2 11, id=Rep2 24}
+Client[Rep2]: memberInfo: group07
+Replica[Rep1]: quickBalance: 1445.009775
+Replica[Rep2]: quickBalance: 1445.009775
+Replica[Rep3]: adding interest 10%
+Client[Rep1]: optimizedSyncedBalance: 1445.009775
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 20}
+Replica[Rep3]: quickBalance: 1445.009775
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 21}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 22}
+Client[Rep1]: added to outstanding: Transaction{cmd=addInterest 20, id=Rep1 23}
+Client[Rep1]: added to outstanding: Transaction{cmd=checkTxStatus Rep1 11, id=Rep1 24}
+Client[Rep1]: memberInfo: group07
+Client[Rep2]: transaction history: (#1) Transaction{cmd=getQuickBalance, id=Rep2 2}; Transaction{cmd=getQuickBalance, id=Rep1 2}; Transaction{cmd=deposit 70, id=Rep2 3}; Transaction{cmd=deposit 100, id=Rep1 3}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=deposit 100, id=Rep1 7}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 8}; Transaction{cmd=deposit 130, id=Rep2 7}; Transaction{cmd=getQuickBalance, id=Rep2 8}; Transaction{cmd=getQuickBalance, id=Rep3 2}; Transaction{cmd=deposit 50, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep3 4}; Transaction{cmd=addInterest 10, id=Rep1 10}; Transaction{cmd=addInterest 5, id=Rep2 10}; Transaction{cmd=addInterest 30, id=Rep3 6}; Transaction{cmd=deposit 110, id=Rep2 12}; Transaction{cmd=deposit 40, id=Rep2 13}; Transaction{cmd=deposit 100, id=Rep1 12}; Transaction{cmd=deposit 50, id=Rep2 14}; Transaction{cmd=deposit 50, id=Rep1 13}; Transaction{cmd=deposit 20, id=Rep2 15}; Transaction{cmd=deposit 40, id=Rep1 14}; Transaction{cmd=deposit 30, id=Rep2 16}; Transaction{cmd=deposit 30, id=Rep1 15}; Transaction{cmd=deposit 100, id=Rep2 17}; Transaction{cmd=deposit 20, id=Rep1 16}; Transaction{cmd=addInterest 3, id=Rep2 18}; Transaction{cmd=deposit 10, id=Rep1 17}; Transaction{cmd=addInterest 10, id=Rep1 18}; Transaction{cmd=getQuickBalance, id=Rep2 20}; Transaction{cmd=deposit 120, id=Rep2 21}; Transaction{cmd=deposit 130, id=Rep2 22}; Transaction{cmd=addInterest 10, id=Rep2 23}; Transaction{cmd=checkTxStatus Rep2 11, id=Rep2 24}
+Client[Rep1]: transaction history: (#1) Transaction{cmd=getQuickBalance, id=Rep2 2}; Transaction{cmd=getQuickBalance, id=Rep1 2}; Transaction{cmd=deposit 70, id=Rep2 3}; Transaction{cmd=deposit 100, id=Rep1 3}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=deposit 100, id=Rep1 7}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 8}; Transaction{cmd=deposit 130, id=Rep2 7}; Transaction{cmd=getQuickBalance, id=Rep2 8}; Transaction{cmd=getQuickBalance, id=Rep3 2}; Transaction{cmd=deposit 50, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep3 4}; Transaction{cmd=addInterest 10, id=Rep1 10}; Transaction{cmd=addInterest 5, id=Rep2 10}; Transaction{cmd=addInterest 30, id=Rep3 6}; Transaction{cmd=deposit 110, id=Rep2 12}; Transaction{cmd=deposit 40, id=Rep2 13}; Transaction{cmd=deposit 100, id=Rep1 12}; Transaction{cmd=deposit 50, id=Rep2 14}; Transaction{cmd=deposit 50, id=Rep1 13}; Transaction{cmd=deposit 20, id=Rep2 15}; Transaction{cmd=deposit 40, id=Rep1 14}; Transaction{cmd=deposit 30, id=Rep2 16}; Transaction{cmd=deposit 30, id=Rep1 15}; Transaction{cmd=deposit 100, id=Rep2 17}; Transaction{cmd=deposit 20, id=Rep1 16}; Transaction{cmd=addInterest 3, id=Rep2 18}; Transaction{cmd=deposit 10, id=Rep1 17}; Transaction{cmd=addInterest 10, id=Rep1 18}; Transaction{cmd=getQuickBalance, id=Rep1 20}; Transaction{cmd=deposit 100, id=Rep1 21}; Transaction{cmd=deposit 100, id=Rep1 22}; Transaction{cmd=addInterest 20, id=Rep1 23}; Transaction{cmd=checkTxStatus Rep1 11, id=Rep1 24}
+Client[Rep2]: added to outstanding: Transaction{cmd=cleanHistory, id=Rep2 25}
+Client[Rep1]: added to outstanding: Transaction{cmd=cleanHistory, id=Rep1 25}
+Client[Rep2]: added to outstanding: Transaction{cmd=deposit 90, id=Rep2 26}
+Client[Rep1]: added to outstanding: Transaction{cmd=deposit 100, id=Rep1 26}
+Client[Rep2]: sleeping for 7s
+Client[Rep1]: sleeping for 8s
+Client[Rep3]: woke up from sleep
+Client[Rep3]: memberInfo: group07
+Client[Rep3]: getting synced balance
+Client[Rep3]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep3 15}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit 200, id=Rep3 8}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit -100, id=Rep3 9}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit 10, id=Rep3 10}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit 30, id=Rep3 11}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit -100, id=Rep3 12}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=deposit 50, id=Rep3 13}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=addInterest 20, id=Rep3 14}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep3 15}
+Replica[Rep2]: depositing 200
+Replica[Rep3]: depositing 200
+Replica[Rep1]: depositing 200
+Replica[Rep2]: depositing -100
+Replica[Rep3]: depositing -100
+Replica[Rep1]: depositing -100
+Replica[Rep2]: depositing 10
+Replica[Rep3]: depositing 10
+Replica[Rep1]: depositing 10
+Replica[Rep2]: depositing 30
+Replica[Rep3]: depositing 30
+Replica[Rep1]: depositing 30
+Replica[Rep2]: depositing -100
+Replica[Rep3]: depositing -100
+Replica[Rep1]: depositing -100
+Replica[Rep2]: depositing 50
+Replica[Rep3]: depositing 50
+Replica[Rep1]: depositing 50
+Replica[Rep2]: adding interest 20%
+Replica[Rep3]: adding interest 20%
+Replica[Rep1]: adding interest 20%
+Replica[Rep3]: quickBalance: 1842.011730
+Replica[Rep2]: quickBalance: 1842.011730
+Client[Rep3]: optimizedSyncedBalance: 1842.011730
+Replica[Rep1]: quickBalance: 1842.011730
+Client[Rep3]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep3 16}
+Client[Rep3]: sleeping for 30s
+Client[Rep2]: woke up from sleep
+Client[Rep2]: getting synced balance
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 27}
+Client[Rep1]: woke up from sleep
+Client[Rep1]: getting synced balance
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 27}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep1 20}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep2 20}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 21}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 22}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 120, id=Rep2 21}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=addInterest 20, id=Rep1 23}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 130, id=Rep2 22}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=checkTxStatus Rep1 11, id=Rep1 24}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=addInterest 10, id=Rep2 23}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=cleanHistory, id=Rep1 25}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=deposit 100, id=Rep1 26}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=checkTxStatus Rep2 11, id=Rep2 24}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 27}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=cleanHistory, id=Rep2 25}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=deposit 90, id=Rep2 26}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 27}
+Replica[Rep2]: quickBalance: 1842.011730
+Replica[Rep1]: quickBalance: 1842.011730
+Replica[Rep3]: quickBalance: 1842.011730
+Replica[Rep2]: quickBalance: 1842.011730
+Replica[Rep1]: quickBalance: 1842.011730
+Replica[Rep3]: quickBalance: 1842.011730
+Replica[Rep2]: depositing 120
+Replica[Rep1]: depositing 120
+Replica[Rep2]: depositing 100
+Replica[Rep3]: depositing 120
+Replica[Rep1]: depositing 100
+Replica[Rep2]: depositing 130
+Replica[Rep3]: depositing 100
+Replica[Rep1]: depositing 130
+Replica[Rep2]: depositing 100
+Replica[Rep1]: depositing 100
+Replica[Rep3]: depositing 130
+Replica[Rep2]: adding interest 10%
+Replica[Rep1]: adding interest 10%
+Replica[Rep3]: depositing 100
+Replica[Rep2]: adding interest 20%
+Replica[Rep1]: adding interest 20%
+Replica[Rep3]: adding interest 10%
+Replica[Rep2]: checking for Rep2 24
+Replica[Rep1]: checking for Rep2 24
+Replica[Rep2]: checking for Rep1 24
+Replica[Rep1]: checking for Rep1 24
+Replica[Rep3]: adding interest 20%
+Replica[Rep2]: transaction history cleaned
+Replica[Rep1]: transaction history cleaned
+Replica[Rep2]: transaction history cleaned
+Replica[Rep1]: transaction history cleaned
+Replica[Rep3]: checking for Rep2 24
+Replica[Rep2]: depositing 90
+Replica[Rep1]: depositing 90
+Replica[Rep2]: depositing 100
+Replica[Rep1]: depositing 100
+Replica[Rep3]: checking for Rep1 24
+Replica[Rep2]: quickBalance: 3215.4554836
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Client[Rep2]: optimizedSyncedBalance: 3215.4554836
+Replica[Rep3]: transaction history cleaned
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep3]: transaction history cleaned
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 28}
+Client[Rep1]: optimizedSyncedBalance: 3215.4554836
+Client[Rep2]: sleeping for 30s
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 28}
+Replica[Rep3]: depositing 90
+Client[Rep1]: sleeping for 30s
+Replica[Rep3]: depositing 100
+Replica[Rep3]: quickBalance: 3215.4554836
+Replica[Rep3]: quickBalance: 3215.4554836
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep3 16}
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep3]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep2 28}
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getQuickBalance, id=Rep1 28}
+Replica[Rep2]: quickBalance: 3215.4554836
+Replica[Rep3]: quickBalance: 3215.4554836
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Replica[Rep3]: quickBalance: 3215.4554836
+Replica[Rep1]: quickBalance: 3215.4554836
+Client[Rep3]: woke up from sleep
+Client[Rep3]: getting synced balance
+Client[Rep3]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep3 17}
+Client[Rep2]: woke up from sleep
+Client[Rep1]: woke up from sleep
+Client[Rep1]: getting synced balance
+Client[Rep2]: getting synced balance
+Client[Rep1]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep1 29}
+Client[Rep2]: added to outstanding: Transaction{cmd=getSyncedBalance, id=Rep2 29}
+Client[Rep3]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep3 17}
+Replica[Rep3]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Replica[Rep1]: quickBalance: 3215.4554836
+Client[Rep3]: optimizedSyncedBalance: 3215.4554836
+Client[Rep3]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep3 18}
+Client[Rep3]: transaction history: (#46) Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep3 18}
+Client[Rep3]: exiting...
+Client[Rep1]: member leaved!
+Client[Rep2]: member leaved!
+Client[Rep3]: we gone
+Client[Rep1]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep1 29}
+Client[Rep2]: broadcasted transaction: Transaction{cmd=getSyncedBalance, id=Rep2 29}
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Client[Rep1]: optimizedSyncedBalance: 3215.4554836
+Replica[Rep1]: quickBalance: 3215.4554836
+Replica[Rep2]: quickBalance: 3215.4554836
+Client[Rep1]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep1 30}
+Client[Rep2]: optimizedSyncedBalance: 3215.4554836
+Client[Rep1]: transaction history: (#46) Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep1 30}
+Client[Rep2]: added to outstanding: Transaction{cmd=getQuickBalance, id=Rep2 30}
+Client[Rep2]: transaction history: (#46) Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep2 30}
+Client[Rep1]: exiting...
+Client[Rep2]: exiting...
+Client[Rep1]: we gone
+Client[Rep2]: we gone
