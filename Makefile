@@ -20,7 +20,6 @@ CLASS_FILES = $(patsubst $(SOURCES)/%.java,$(CLASSPATH)/%.class,$(JAVA_SOURCES))
 SPREAD_SERVER_ADDRESS = 127.0.0.1
 ACCOUNT_NAME = group07
 REPLICAS = 3
-COMMANDS_PATH = $(RESOURCES)/commands
 
 # Create directories if they don't exist
 $(LOGDIR):
@@ -54,7 +53,7 @@ $(CLIENT_JAR): classfiles | $(BINDIR)
 
 # Run simulation using SimulateClients
 run_simulation: $(CLIENT_JAR)
-	java -cp $(CLIENT_JAR):$(DEPS) $(SIMULATE_MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) $(COMMANDS_PATH)
+	java -cp $(CLIENT_JAR):$(DEPS) $(SIMULATE_MAIN_CLASS) $(SPREAD_SERVER_ADDRESS) $(ACCOUNT_NAME) $(REPLICAS) $(RESOURCES)
 
 # Run a single client in interactive mode
 run_client: $(CLIENT_JAR)

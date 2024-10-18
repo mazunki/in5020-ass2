@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Replica {
@@ -149,8 +150,15 @@ public class Replica {
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (true) {
 				System.out.print("> ");
-				String line = scanner.nextLine();
-				if (line.equalsIgnoreCase("exit")) {
+				String line;
+				try {
+					line = scanner.nextLine();
+					if (line.equalsIgnoreCase("exit")) {
+						break;
+					}
+					if (line.isBlank()) continue;
+					if (line.startsWith("#")) continue;
+				} catch (NoSuchElementException e) {
 					break;
 				}
 
@@ -164,8 +172,7 @@ public class Replica {
 			}
 		}
 
-		// Print final balance
-		replica.getQuickBalance();
+		System.out.println("quickBalance: " + replica.getQuickBalance());
 	}
 
 }

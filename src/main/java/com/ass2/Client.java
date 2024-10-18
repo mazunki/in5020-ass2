@@ -292,8 +292,16 @@ public class Client {
 		// Run interactive mode
 		client.loadCommandsFromInteractive();
 
+		client.scheduler.shutdown();
+		try {
+			if (!client.scheduler.awaitTermination(15, TimeUnit.SECONDS)) {
+				client.scheduler.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+		};
+
 		// Print final balance after interactive mode ends
-		System.out.println("Final balance: " + client.getReplica().getQuickBalance());
+		System.out.println("Final balance: " + client.getSyncedBalance());
 	}
 
 

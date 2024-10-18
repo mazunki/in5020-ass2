@@ -19,6 +19,9 @@ public class SimulateClients {
         int noOfReplicas = Integer.parseInt(args[2]);
         String pathToCommands = args[3];
 
+		String commandPrefix = pathToCommands + "/commands";
+		String commandSuffix = ".txt";
+
         InetAddress address = InetAddress.getByName(serverAddress);
         Client[] clients = new Client[noOfReplicas];
 
@@ -30,19 +33,18 @@ public class SimulateClients {
             final int index = i;
 			System.out.println("building new");
             executorService.submit(() -> {
-                String commandFile = pathToCommands + (index + 1) + ".txt";
+                String commandFile = commandPrefix + (index + 1) + commandSuffix;
                 clients[index] = new Client(address, accountName, "Rep" + (index + 1));
                 clients[index].loadCommandsFromFile(commandFile);
             });
         }
 
 		Thread.sleep(15*1000);
-		System.out.println("next!");
 
         for (int i = 2; i < noOfReplicas; i++) {
             final int index = i;
             executorService.submit(() -> {
-                String commandFile = pathToCommands + (index + 1) + ".txt";
+                String commandFile = commandPrefix + (index + 1) + commandSuffix;
                 clients[index] = new Client(address, accountName, "Rep" + (index + 1));
                 clients[index].loadCommandsFromFile(commandFile);
             });
@@ -57,8 +59,6 @@ public class SimulateClients {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-		System.out.println("are we here");
 
         for (Client client : clients) {
             System.out.println(client.toString() + " final balance: " + client.getReplica().getQuickBalance());
