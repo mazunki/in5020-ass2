@@ -1,99 +1,77 @@
 package com.ass2;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.math.BigDecimal;
 
 public class Transaction implements Serializable {
-    String command;
-    String id;
-
+    private String command;
+    private String id;
 
     public Transaction(String command, String id) {
         this.command = command;
         this.id = id;
-    
     }
 
-    // Getter methods for command and id.
+    // Getter methods for command and id
     public String getId() {
         return id;
     }
+
     public String getCommand() {
         return command;
     }
 
     public String commandName() {
-        String[] part = command.split(" ");
-        return part[0];
+        String[] parts = command.split(" ");
+        return parts[0];
     }
 
     public String[] commandArgs() {
-        String[] part = command.split(" ");
-        return Arrays.copyOfRange(part, 1, part.length);
+        String[] parts = command.split(" ");
+        return parts.length > 1 ? parts[1].split(" ") : new String[0];
     }
 
-    public String getClientName() {
-        String[] part = id.split(" ");
-        return part[0];
-    }
-
-    public int getOutstandingCounter() {
-        String[] part = id.split(" ");
-        return Integer.parseInt(part[1]);
-    }
-
-
-    // Parses line, and figures out what to do with it
-    public void execute(Client client) {
+    // Executes the transaction on the provided Replica instance
+    public void execute(Replica replica) {
         String[] parts = this.command.split(" ");
-
         String cmd = parts[0];
 
         switch (cmd) {
-            case "getQuickBalance" -> client.getQuickBalance();
-            case "getSyncedBalance" -> client.getSyncedBalance();
-            case "getHistory" -> client.getHistory();
-            case "cleanHistory" -> client.cleanHistory();
-            case "memberInfo" -> client.memberInfo();
-            case "exit" -> client.exit();
             case "deposit" -> {
-
                 if (parts.length == 2) {
-                    client.account.deposit(Integer.parseInt(parts[1]));
+                    replica.deposit(new BigDecimal(parts[1]));
                 } else {
-                    throw new IllegalArgumentException("Invalid number of arguments for deposit");
+                    System.out.println("Invalid number of arguments for deposit.");
                 }
             }
-            case "addInterest" -> {
+            case "interest" -> {
                 if (parts.length == 2) {
-                    client.account.addInterest(Integer.parseInt(parts[1]));
+                    replica.addInterest(Integer.parseInt(parts[1]));
                 } else {
-                    throw new IllegalArgumentException("Invalid number of arguments for addInterest");
+                    System.out.println("Invalid number of arguments for interest.");
                 }
             }
-            case "checkTxStatus" -> {
-                if (parts.length == 2) {
-                    client.checkTxStatus(parts[1]);
-                } else {
-                    throw new IllegalArgumentException("Invalid number of arguments for checkTxStatus");
-                }
-            }
+            case "getQuickBalance", "balance" -> replica.getBalance();
+            case "getSyncedBalance" -> replica.getSyncedBalance();
+            case "getHistory" -> replica.getHistory();
+            case "cleanHistory" -> replica.cleanHistory();
             case "sleep" -> {
                 if (parts.length == 2) {
-                    client.sleep(Integer.parseInt(parts[1]));
+                    replica.sleep(Integer.parseInt(parts[1]));
                 } else {
-                    throw new IllegalArgumentException("Invalid number of arguments for sleep");
+                    System.out.println("Invalid sleep command.");
                 }
             }
-            default -> throw new IllegalArgumentException("Unknown command: " + command);
+            case "exit" -> {
+				System.exit(0);
+			}
+            default -> System.out.println("Unknown command: " + command);
         }
-
-
     }
 
     @Override
     public String toString() {
-        return "Transaction{cmd=" + command +", id=" + id + "}";   
+        return "Transaction{cmd=" + command + ", id=" + id + "}";
     }
-
 }
+
