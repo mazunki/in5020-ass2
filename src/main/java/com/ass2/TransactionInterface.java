@@ -2,7 +2,6 @@ package com.ass2;
 
 import java.math.BigDecimal;
 
-
 public interface TransactionInterface {
     public void deposit(BigDecimal amount);
     public void deposit(int amount);
@@ -13,6 +12,5 @@ public interface TransactionInterface {
     public void withdraw(float amount);
 
     public void addInterest(int interest);
-
 }
 

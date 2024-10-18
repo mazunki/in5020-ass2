@@ -2,7 +2,10 @@ package com.ass2;
 
 import java.math.BigDecimal;
 
-
+/*
+ * An Account represents a single bank account with a balance
+ * which can interacted with
+**/
 public class Account implements TransactionInterface {
     private BigDecimal balance;
     private final String accountName;
@@ -33,6 +36,7 @@ public class Account implements TransactionInterface {
 
     @Override
     public void addInterest(int interest) {
+        // The interest value is a percentage
         BigDecimal interestAmount = balance.multiply(new BigDecimal(interest)).divide(new BigDecimal(100));
         deposit(interestAmount);
     }
