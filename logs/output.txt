@@ -1,0 +1,139 @@
+rm -rf target
+javac --target 21 -d target -cp target:ext/spread.jar --source-path src/main/java src/main/java/com/ass2/Account.java
+javac --target 21 -d target -cp target:ext/spread.jar --source-path src/main/java src/main/java/com/ass2/Client.java
+javac --target 21 -d target -cp target:ext/spread.jar --source-path src/main/java src/main/java/com/ass2/SimulateClients.java
+jar cfm bin/client.jar src/main/resources/MANIFEST.MF -C target .
+java -cp bin/client.jar:ext/spread.jar com.ass2.SimulateClients 127.0.0.1 group07 3 src/main/resources
+building new
+building new
+group07
+group07
+0
+0
+0
+0
+0
+0
+group07
+0
+Client<Rep1> final balance: 0
+0
+Client<Rep2> final balance: 0
+0
+Client<Rep3> final balance: 0
+0
+0
+0
+0
+0
+0
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+170
+400
+400
+170
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+400
+450
+450
+450
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+519.75
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+1649.279775
+group07
+Transaction{cmd=getQuickBalance, id=Rep2 2}; Transaction{cmd=getQuickBalance, id=Rep1 2}; Transaction{cmd=deposit 70, id=Rep2 3}; Transaction{cmd=deposit 100, id=Rep1 3}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=deposit 130, id=Rep2 7}; Transaction{cmd=deposit 100, id=Rep1 7}; Transaction{cmd=getQuickBalance, id=Rep2 8}; Transaction{cmd=getQuickBalance, id=Rep1 8}; Transaction{cmd=getQuickBalance, id=Rep3 2}; Transaction{cmd=deposit 50, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep3 4}; Transaction{cmd=addInterest 10, id=Rep1 10}; Transaction{cmd=addInterest 5, id=Rep2 10}; Transaction{cmd=deposit 100, id=Rep1 12}; Transaction{cmd=deposit 110, id=Rep2 12}; Transaction{cmd=deposit 50, id=Rep1 13}; Transaction{cmd=deposit 40, id=Rep2 13}; Transaction{cmd=deposit 40, id=Rep1 14}; Transaction{cmd=deposit 50, id=Rep2 14}; Transaction{cmd=deposit 30, id=Rep1 15}; Transaction{cmd=deposit 20, id=Rep2 15}; Transaction{cmd=deposit 20, id=Rep1 16}; Transaction{cmd=deposit 30, id=Rep2 16}; Transaction{cmd=deposit 10, id=Rep1 17}; Transaction{cmd=deposit 100, id=Rep2 17}; Transaction{cmd=addInterest 10, id=Rep1 18}; Transaction{cmd=addInterest 3, id=Rep2 18}; Transaction{cmd=addInterest 30, id=Rep3 6}; Transaction{cmd=deposit 200, id=Rep3 8}; Transaction{cmd=deposit -100, id=Rep3 9}; Transaction{cmd=deposit 10, id=Rep3 10}; Transaction{cmd=deposit 30, id=Rep3 11}; Transaction{cmd=deposit -100, id=Rep3 12}; Transaction{cmd=deposit 50, id=Rep3 13}; Transaction{cmd=addInterest 20, id=Rep3 14}; Transaction{cmd=getQuickBalance, id=Rep1 20}; Transaction{cmd=deposit 100, id=Rep1 21}; Transaction{cmd=deposit 100, id=Rep1 22}; Transaction{cmd=addInterest 20, id=Rep1 23}; Transaction{cmd=checkTxStatus Rep1 11, id=Rep1 24}
+group07
+Transaction{cmd=getQuickBalance, id=Rep2 2}; Transaction{cmd=getQuickBalance, id=Rep1 2}; Transaction{cmd=deposit 70, id=Rep2 3}; Transaction{cmd=deposit 100, id=Rep1 3}; Transaction{cmd=getQuickBalance, id=Rep2 6}; Transaction{cmd=getQuickBalance, id=Rep1 6}; Transaction{cmd=deposit 130, id=Rep2 7}; Transaction{cmd=deposit 100, id=Rep1 7}; Transaction{cmd=getQuickBalance, id=Rep2 8}; Transaction{cmd=getQuickBalance, id=Rep1 8}; Transaction{cmd=getQuickBalance, id=Rep3 2}; Transaction{cmd=deposit 50, id=Rep3 3}; Transaction{cmd=getQuickBalance, id=Rep3 4}; Transaction{cmd=addInterest 10, id=Rep1 10}; Transaction{cmd=addInterest 5, id=Rep2 10}; Transaction{cmd=deposit 100, id=Rep1 12}; Transaction{cmd=deposit 110, id=Rep2 12}; Transaction{cmd=deposit 50, id=Rep1 13}; Transaction{cmd=deposit 40, id=Rep2 13}; Transaction{cmd=deposit 40, id=Rep1 14}; Transaction{cmd=deposit 50, id=Rep2 14}; Transaction{cmd=deposit 30, id=Rep1 15}; Transaction{cmd=deposit 20, id=Rep2 15}; Transaction{cmd=deposit 20, id=Rep1 16}; Transaction{cmd=deposit 30, id=Rep2 16}; Transaction{cmd=deposit 10, id=Rep1 17}; Transaction{cmd=deposit 100, id=Rep2 17}; Transaction{cmd=addInterest 10, id=Rep1 18}; Transaction{cmd=addInterest 3, id=Rep2 18}; Transaction{cmd=addInterest 30, id=Rep3 6}; Transaction{cmd=deposit 200, id=Rep3 8}; Transaction{cmd=deposit -100, id=Rep3 9}; Transaction{cmd=deposit 10, id=Rep3 10}; Transaction{cmd=deposit 30, id=Rep3 11}; Transaction{cmd=deposit -100, id=Rep3 12}; Transaction{cmd=deposit 50, id=Rep3 13}; Transaction{cmd=addInterest 20, id=Rep3 14}; Transaction{cmd=getQuickBalance, id=Rep2 20}; Transaction{cmd=deposit 120, id=Rep2 21}; Transaction{cmd=deposit 130, id=Rep2 22}; Transaction{cmd=addInterest 10, id=Rep2 23}; Transaction{cmd=checkTxStatus Rep2 11, id=Rep2 24}
+2087.135730
+2087.135730
+2087.135730
+2087.135730
+2087.135730
+2087.135730
+group07
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+3539.0191636
+Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep2 30}
+Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep1 30}
+LISTENER: told to exit so returning
+LISTENER: told to exit so returning
+3539.0191636
+3539.0191636
+Transaction{cmd=deposit 100, id=Rep1 26}; Transaction{cmd=deposit 90, id=Rep2 26}; Transaction{cmd=getQuickBalance, id=Rep1 28}; Transaction{cmd=getQuickBalance, id=Rep2 28}; Transaction{cmd=getQuickBalance, id=Rep3 16}; Transaction{cmd=getQuickBalance, id=Rep3 18}
+LISTENER: told to exit so returning
