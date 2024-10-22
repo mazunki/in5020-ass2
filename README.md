@@ -34,4 +34,3 @@ The better (optimized) implementation circumvents this issue entirely by simply 
 
 As a team, we discussed the architecture of the project, figuring out what the requirements were. Lise implemented everything related to the account, and the listener; Mazunki worked on the naive synchronization, and together handled the rest of the Client, Replica and improved the implementation of the synchronization. Mouaz implemented the rest of the functions.
 
-
