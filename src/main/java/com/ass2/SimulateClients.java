@@ -19,7 +19,7 @@ public class SimulateClients {
         int noOfReplicas = Integer.parseInt(args[2]);
         String pathToCommands = args[3];
 
-		String commandPrefix = pathToCommands + "/commands";
+		String commandPrefix = pathToCommands + "/Rep";
 		String commandSuffix = ".txt";
 
         InetAddress address = InetAddress.getByName(serverAddress);

@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Client {
 	private SpreadConnection connection;
@@ -64,6 +65,10 @@ public class Client {
 		try (Scanner scanner = new Scanner(new java.io.File(filename))) {
 			while (scanner.hasNextLine()) {
 				this.parseInputLine(scanner.nextLine());
+				try {
+					Thread.sleep(ThreadLocalRandom.current().nextInt(500, 1501));
+				} catch (InterruptedException e) {
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
