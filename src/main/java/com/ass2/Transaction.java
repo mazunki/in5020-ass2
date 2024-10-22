@@ -30,7 +30,7 @@ public class Transaction implements Serializable {
 
     // Makes a list of the arguments of the provided command
     public String[] commandArgs() {
-        String[] parts = command.split(" ", 1);
+        String[] parts = command.split(" ", 2);
         return parts.length > 1 ? parts[1].split(" ") : new String[0];
     }
 
